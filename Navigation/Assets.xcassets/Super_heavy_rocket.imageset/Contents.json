@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "Super_heavy_rocket-1.jpg",
+      "filename" : "Super_heavy_rocket.jpg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Super_heavy_rocket.jpg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Super_heavy_rocket-2.jpg",
       "idiom" : "universal",
       "scale" : "3x"
     }

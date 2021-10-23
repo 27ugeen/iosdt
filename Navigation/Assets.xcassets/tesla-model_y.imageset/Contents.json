@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "tesla-model_y-1.jpg",
+      "filename" : "tesla-model_y.jpg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "tesla-model_y.jpg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "tesla-model_y-2.jpg",
       "idiom" : "universal",
       "scale" : "3x"
     }
