@@ -15,8 +15,30 @@ class ProfileViewController: UIViewController {
     let photoCellID = String(describing: PhotosTableViewCell.self)
     let headerID = String(describing: ProfileHeaderView.self)
     
+    let userService: UserServiceProtocol
+    var userLoginName: String
+    
+    init(userService: UserServiceProtocol, userName: String) {
+        self.userService = userService
+        self.userLoginName = userName
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+    #if DEBUG
+        let testUser = TestUserService().showUserInfo(userName: userLoginName)
+        print("Current user \"\(testUser.userFullName)\" is logged in")
+    #else
+        let currentUser = CurrentUserService().showUserInfo(userName: userLoginName)
+        print("Current user \"\(currentUser.userFullName)\" is logged in")
+    #endif
         
         view.backgroundColor = .white
         

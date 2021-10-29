@@ -107,8 +107,13 @@ class LogInViewController: UIViewController {
     
     @objc
     func buttonPressed() {
-        print("Login button pressed...")
-        let vc = ProfileViewController()
+        var vc: ProfileViewController
+    #if DEBUG
+        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
+    #else
+        let loginName = loginTextField.text
+        vc = ProfileViewController(userService: CurrentUserService(), userName: loginName ?? "nothing entered")
+    #endif
         navigationController?.pushViewController(vc, animated: true)
     }
 }
