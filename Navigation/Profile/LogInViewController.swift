@@ -116,7 +116,9 @@ class LogInViewController: UIViewController {
         let name = loginTextField.text ?? ""
         let password = passwordTextField.text ?? ""
 //        delegate?.didTapOnButton(self, enteredLogin: loginTextField.text ?? "", enteredPassword: passwordTextField.text ?? "")
-        let status: Bool = loginInspector.didTapOnButton(self, enteredLogin: name, enteredPassword: password)
+        let loginFactory = MyLoginFactory()
+        let checkedUser = loginFactory.checkUserLogin()
+        let status: Bool = checkedUser.didTapOnButton(self, enteredLogin: name, enteredPassword: password)
         guard status else {
             print("Try again")
             return
@@ -215,4 +217,15 @@ class LoginInspector: LoginViewControllerDelegate {
     }
 }
 
-let loginInspector = LoginInspector(useCase: checkerInstance)
+/// *FACTORY*
+protocol LoginFactory {
+    func checkUserLogin() -> LoginInspector
+}
+
+/// *FACTORY - IMPLEMENTATION*
+class MyLoginFactory: LoginFactory {
+  func checkUserLogin() -> LoginInspector {
+        let loginInspector = LoginInspector(useCase: checkerInstance)
+        return loginInspector
+    }
+}

@@ -28,10 +28,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         feedNavVC.tabBarItem = UITabBarItem(title: feedVC.title, image: UIImage(systemName: "house.fill"), tag: 0)
         
         let loginNavVC = UINavigationController(rootViewController: loginVC)
+        
+        let loginFactory = MyLoginFactory().self
+        let checkedUser = loginFactory.checkUserLogin()
+        loginNavVC.delegate = checkedUser as? UINavigationControllerDelegate
+        
         loginNavVC.isNavigationBarHidden = true
-        loginNavVC.delegate = loginInspector as? UINavigationControllerDelegate
         
         loginNavVC.tabBarItem = UITabBarItem(title: loginVC.title, image: UIImage(systemName: "person.fill"), tag: 1)
+        
         
         tabBarController.viewControllers = [feedNavVC, loginNavVC]
         
