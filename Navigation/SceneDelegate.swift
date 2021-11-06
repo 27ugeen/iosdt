@@ -12,7 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        
+
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
         window?.makeKeyAndVisible()
@@ -29,6 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let loginNavVC = UINavigationController(rootViewController: loginVC)
         loginNavVC.isNavigationBarHidden = true
+        loginNavVC.delegate = loginInspector as? UINavigationControllerDelegate
         
         loginNavVC.tabBarItem = UITabBarItem(title: loginVC.title, image: UIImage(systemName: "person.fill"), tag: 1)
         

@@ -9,6 +9,8 @@ import UIKit
 
 class LogInViewController: UIViewController {
     
+    weak var delegate: LoginViewControllerDelegate?
+    
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
@@ -111,8 +113,15 @@ class LogInViewController: UIViewController {
     #if DEBUG
         vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
     #else
-        let loginName = loginTextField.text
-        vc = ProfileViewController(userService: CurrentUserService(), userName: loginName ?? "nothing entered")
+        let name = loginTextField.text ?? ""
+        let password = passwordTextField.text ?? ""
+//        delegate?.didTapOnButton(self, enteredLogin: loginTextField.text ?? "", enteredPassword: passwordTextField.text ?? "")
+        let status: Bool = loginInspector.didTapOnButton(self, enteredLogin: name, enteredPassword: password)
+        guard status else {
+            print("Try again")
+            return
+        }
+        vc = ProfileViewController(userService: CurrentUserService(), userName: name )
     #endif
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -185,12 +194,25 @@ private extension LogInViewController {
     }
 }
 
-extension UIImage {
-    func alpha(_ value:CGFloat) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(size, false, scale)
-        draw(at: CGPoint.zero, blendMode: .normal, alpha: value)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return newImage!
+protocol LoginViewControllerDelegate: AnyObject {
+
+    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool
+}
+
+class LoginInspector: LoginViewControllerDelegate {
+    
+    private let loginUseCase: Checker
+    
+    init(useCase: Checker) {
+        self.loginUseCase = useCase
+    }
+    
+    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool {
+        guard loginUseCase.checkLoginPassword(userLogin: enteredLogin, userPassword: enteredPassword) else {
+            return false
+        }
+        return true
     }
 }
+
+let loginInspector = LoginInspector(useCase: checkerInstance)
