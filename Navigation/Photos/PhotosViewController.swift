@@ -6,8 +6,23 @@
 //
 
 import UIKit
+import iOSIntPackage
 
 class PhotosViewController: UIViewController {
+    
+    var imagePublisherFacade = ImagePublisherFacade()
+    
+//    let userImages = ImgStorage.arrImg
+    
+    private var userImages: [UIImage]? {
+        
+        didSet {
+//            let photosStorage = PhotosStorage()
+//            let userArrayImages = UserImagesArray()
+//            userPhoto = userArrayImages.recivePhotos(photos: photosStorage)
+            collectionView.reloadData()
+        }
+    }
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -30,7 +45,15 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
+        imagePublisherFacade.subscribe(self)
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: 18, userImages: ImgStorage.arrImg)
+        
         self.title = "Photo Gallery"
+    }
+    
+    deinit {
+        imagePublisherFacade.rechargeImageLibrary()
+        imagePublisherFacade.removeSubscription(for: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,6 +62,7 @@ class PhotosViewController: UIViewController {
         
         let button = UIBarButtonItem(image: UIImage(systemName: "plus"), style: UIBarButtonItem.Style.done, target: self, action: nil)
         self.navigationItem.setRightBarButtonItems([button], animated: true)
+//        imagePublisherFacade.addImagesWithTimer(time: 2, repeat: 18, userImages: ImgStorage.arrImg)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -64,19 +88,36 @@ extension PhotosViewController {
     }
 }
 
+extension PhotosViewController: ImageLibrarySubscriber {
+    func receive(images: [UIImage]) {
+        userImages = images
+    }
+}
+
+
 extension PhotosViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return PhotosStorage.tableModel.count
+//        return PhotosStorage.tableModel.count
+        return 1
+//        return userPhoto?.count ?? 1
+//        if let section = dataSource?.count {
+//            return section
+//        } else {
+//            return 0
+//        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return PhotosStorage.tableModel[section].photos.count
+//        return PhotosStorage.tableModel[section].photos.count
+        return userImages?.count ?? 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
-        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.row]
+//        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.row]
+//        let cell = UICollectionViewCell()
+        cell.photo = ImgStorage.arrImg.first
         return cell
     }
 }
@@ -105,3 +146,5 @@ extension PhotosViewController: UICollectionViewDelegateFlowLayout {
         print("Photo Gallery: item: \(indexPath.item)")
     }
 }
+
+

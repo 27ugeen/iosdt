@@ -112,7 +112,9 @@ extension PhotosTableViewCell: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = photosPreview.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
-        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.item]
+//        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.item]
+        cell.photo = ImgStorage.arrImg.randomElement()
+        
         return cell
     }
 }
