@@ -9,40 +9,32 @@ import UIKit
 
 class FeedViewController: UIViewController {
     
-    let buttonTop: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Top Button", for: .normal)
-        button.setTitle("Top pressed", for: .highlighted)
-        button.setTitleColor(.white, for: .normal)
-        button.setTitleColor(.purple, for: .highlighted)
-        button.addTarget(self, action: #selector(buttonTupped), for: .touchUpInside)
-        return button
-    }()
-    
-    let buttonBot: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Bot Button", for: .normal)
-        button.setTitle("Bot pressed", for: .highlighted)
-        button.setTitleColor(.white, for: .normal)
-        button.setTitleColor(.purple, for: .highlighted)
-        button.addTarget(self, action: #selector(buttonTupped), for: .touchUpInside)
-        return button
-    }()
+    let buttonTop = MagicButton(title: "Top Button", titleColor: .white)
+    let buttonBot = MagicButton(title: "Bot Button", titleColor: .white)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        buttonTop.setTitle(buttonTop.title, for: .normal)
+        buttonTop.setTitle("Top is pressed", for: .highlighted)
+        buttonTop.setTitleColor(.purple, for: .highlighted)
+        buttonBot.setTitle(buttonBot.title, for: .normal)
+        buttonBot.setTitle("Bot is pressed", for: .highlighted)
+        buttonBot.setTitleColor(.purple, for: .highlighted)
+        
+        buttonTop.onTap = {
+            let vc = PostViewController()
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        buttonBot.onTap = {
+            let vc = PostViewController()
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
         
         setupStackView()
         
         self.title = "Feed"
         self.view.backgroundColor = .systemOrange
-    }
-    
-    @objc func buttonTupped() {
-        let vc = PostViewController()
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
