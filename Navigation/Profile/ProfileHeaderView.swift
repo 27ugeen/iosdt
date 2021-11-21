@@ -69,7 +69,6 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
 
 extension ProfileHeaderView {
     private func setupStatusButton() {
-        setStatusButton.setTitle(setStatusButton.title, for: .normal)
         setStatusButton.setTitleColor(.purple, for: .highlighted)
         setStatusButton.backgroundColor = .systemBlue.withAlphaComponent(0.7)
         setStatusButton.layer.cornerRadius = 14

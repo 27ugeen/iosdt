@@ -96,13 +96,13 @@
 			isa = PBXGroup;
 			children = (
 				112A120A26A6156D005F46A6 /* AppDelegate.swift */,
-				11FD6E8727497E9A002D92F5 /* MagicButton.swift */,
 				112A120C26A6156D005F46A6 /* SceneDelegate.swift */,
 				11097B5C272604F800219C85 /* Utils.swift */,
 				112A120E26A6156D005F46A6 /* ViewController.swift */,
 				112A121326A6156F005F46A6 /* Assets.xcassets */,
 				112A121526A6156F005F46A6 /* LaunchScreen.storyboard */,
 				112A121826A6156F005F46A6 /* Info.plist */,
+				11FD6E8927499A48002D92F5 /* Components */,
 				112A123A26A7837B005F46A6 /* Feed */,
 				112A123B26A78395005F46A6 /* Profile */,
 				112A123C26A783A6005F46A6 /* Post */,
@@ -167,6 +167,14 @@
 				119D85E726C050EF00227F53 /* Photos.swift */,
 			);
 			path = Photos;
+			sourceTree = "<group>";
+		};
+		11FD6E8927499A48002D92F5 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				11FD6E8727497E9A002D92F5 /* MagicButton.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		7E9CB33AC0C121CFBD52EF6B /* Pods */ = {

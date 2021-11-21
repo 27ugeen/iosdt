@@ -10,18 +10,13 @@ import UIKit
 
 final class MagicButton: UIButton {
     
-    var title: String?
-    var titleColor: UIColor?
-    var buttonColor: UIColor?
-    
     var onTap: (() -> Void)?
     
     init(title: String, titleColor: UIColor) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
-        self.title = title
-        self.titleColor = titleColor
-//        self.buttonColor = buttonColor
+        self.setTitle(title, for: .normal)
+        self.setTitleColor(titleColor, for: .normal)
         self.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     

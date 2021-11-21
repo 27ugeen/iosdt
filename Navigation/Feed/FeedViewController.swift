@@ -15,10 +15,8 @@ class FeedViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        buttonTop.setTitle(buttonTop.title, for: .normal)
         buttonTop.setTitle("Top is pressed", for: .highlighted)
         buttonTop.setTitleColor(.purple, for: .highlighted)
-        buttonBot.setTitle(buttonBot.title, for: .normal)
         buttonBot.setTitle("Bot is pressed", for: .highlighted)
         buttonBot.setTitleColor(.purple, for: .highlighted)
         

@@ -97,7 +97,6 @@ extension LogInViewController {
         let backgroundImage = UIImage(named: "blue_pixel")
         let trasparentImage = backgroundImage!.alpha(0.8)
         
-        loginButton.setTitle(loginButton.title, for: .normal)
         loginButton.setBackgroundImage(backgroundImage, for: .normal)
         loginButton.setBackgroundImage(trasparentImage, for: .selected)
         loginButton.setBackgroundImage(trasparentImage, for: .highlighted)
