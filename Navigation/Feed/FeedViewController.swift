@@ -9,8 +9,14 @@ import UIKit
 
 class FeedViewController: UIViewController {
     
-    let buttonTop = MagicButton(title: "Top Button", titleColor: .white)
-    let buttonBot = MagicButton(title: "Bot Button", titleColor: .white)
+    static let instance = FeedViewController()
+    
+    let buttonTop = MagicButton(title: "Top Button", titleColor: .white) {
+        instance.setupButtons()
+    }
+    let buttonBot = MagicButton(title: "Bot Button", titleColor: .white) {
+        instance.setupButtons()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

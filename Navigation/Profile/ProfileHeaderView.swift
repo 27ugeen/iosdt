@@ -54,7 +54,10 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
         return text
     }()
     
-    let setStatusButton = MagicButton(title: "Set status", titleColor: .white)
+    let setStatusButton = MagicButton(title: "Set status", titleColor: .white) {
+        print("Set status button pressed...")
+        ProfileHeaderView().setupStatusButton()
+    }
     
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)

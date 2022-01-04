@@ -9,6 +9,8 @@ import UIKit
 
 class LogInViewController: UIViewController {
     
+    static let instance = LogInViewController(delegate: MyLoginFactory().createChecker())
+    
     var delegate: LoginViewControllerDelegate
     
     let scrollView: UIScrollView = {
@@ -68,7 +70,9 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    let loginButton = MagicButton(title: "Log In", titleColor: .white)
+    let loginButton = MagicButton(title: "Log In", titleColor: .white) {
+        instance.setupLoginButton()
+    }
     
     init(delegate: LoginViewControllerDelegate) {
         self.delegate = delegate
