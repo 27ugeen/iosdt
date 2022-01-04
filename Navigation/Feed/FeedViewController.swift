@@ -15,17 +15,17 @@ class FeedViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let vc = PostViewController()
+        
         buttonTop.setTitle("Top is pressed", for: .highlighted)
         buttonTop.setTitleColor(.purple, for: .highlighted)
         buttonBot.setTitle("Bot is pressed", for: .highlighted)
         buttonBot.setTitleColor(.purple, for: .highlighted)
         
         buttonTop.onTap = {
-            let vc = PostViewController()
             self.navigationController?.pushViewController(vc, animated: true)
         }
         buttonBot.onTap = {
-            let vc = PostViewController()
             self.navigationController?.pushViewController(vc, animated: true)
         }
         
