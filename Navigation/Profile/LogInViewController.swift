@@ -68,24 +68,7 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    let loginButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        let backgroundImage = UIImage(named: "blue_pixel")
-        let trasparentImage = backgroundImage!.alpha(0.8)
-        
-        button.setBackgroundImage(backgroundImage, for: .normal)
-        button.setBackgroundImage(trasparentImage, for: .selected)
-        button.setBackgroundImage(trasparentImage, for: .highlighted)
-        button.setBackgroundImage(trasparentImage, for: .disabled)
-        button.layer.cornerRadius = 10
-        button.clipsToBounds = true
-        button.setTitle("Log In", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
-        return button
-    }()
+    let loginButton = MagicButton(title: "Log In", titleColor: .white)
     
     init(delegate: LoginViewControllerDelegate) {
         self.delegate = delegate
@@ -99,6 +82,7 @@ class LogInViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupLoginButton()
         setupViews()
     }
     
@@ -115,23 +99,35 @@ class LogInViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-    
-    @objc
-    func buttonPressed() {
-        var vc: ProfileViewController
-    #if DEBUG
-        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
-    #else
-        let name = loginTextField.text ?? ""
-        let password = passwordTextField.text ?? ""
-        let status: Bool = (delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
-        guard status else {
-            print("Try again")
-            return
+}
+
+extension LogInViewController {
+    func setupLoginButton() {
+        let backgroundImage = UIImage(named: "blue_pixel")
+        let trasparentImage = backgroundImage!.alpha(0.8)
+        loginButton.setBackgroundImage(backgroundImage, for: .normal)
+        loginButton.setBackgroundImage(trasparentImage, for: .selected)
+        loginButton.setBackgroundImage(trasparentImage, for: .highlighted)
+        loginButton.setBackgroundImage(trasparentImage, for: .disabled)
+        loginButton.layer.cornerRadius = 10
+        loginButton.clipsToBounds = true
+        
+        loginButton.onTap = {
+            var vc: ProfileViewController
+        #if DEBUG
+            vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
+        #else
+            let name = loginTextField.text ?? ""
+            let password = passwordTextField.text ?? ""
+            let status: Bool = (delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
+            guard status else {
+                print("Try again")
+                return
+            }
+            vc = ProfileViewController(userService: CurrentUserService(), userName: name )
+        #endif
+            self.navigationController?.pushViewController(vc, animated: true)
         }
-        vc = ProfileViewController(userService: CurrentUserService(), userName: name )
-    #endif
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
 

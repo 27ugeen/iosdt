@@ -15,6 +15,16 @@ class FeedViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupButtons()
+        setupStackView()
+        
+        self.title = "Feed"
+        self.view.backgroundColor = .systemOrange
+    }
+}
+
+extension FeedViewController {
+    func setupButtons() {
         let vc = PostViewController()
         
         buttonTop.setTitle("Top is pressed", for: .highlighted)
@@ -28,11 +38,6 @@ class FeedViewController: UIViewController {
         buttonBot.onTap = {
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        
-        setupStackView()
-        
-        self.title = "Feed"
-        self.view.backgroundColor = .systemOrange
     }
 }
 
