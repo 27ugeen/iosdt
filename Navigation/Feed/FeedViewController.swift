@@ -9,18 +9,19 @@ import UIKit
 
 class FeedViewController: UIViewController {
     
-    static let instance = FeedViewController()
-    
-    let buttonTop = MagicButton(title: "Top Button", titleColor: .white) {
-        instance.setupButtons()
-    }
-    let buttonBot = MagicButton(title: "Bot Button", titleColor: .white) {
-        instance.setupButtons()
+    lazy var buttonTop = MagicButton(title: "Top Button", titleColor: .white) {
+        let vc = PostViewController()
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
+    lazy var buttonBot = MagicButton(title: "Bot Button", titleColor: .white) {
+        let vc = PostViewController()
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupButtons()
         setupStackView()
         
@@ -31,19 +32,10 @@ class FeedViewController: UIViewController {
 
 extension FeedViewController {
     func setupButtons() {
-        let vc = PostViewController()
-        
         buttonTop.setTitle("Top is pressed", for: .highlighted)
         buttonTop.setTitleColor(.purple, for: .highlighted)
         buttonBot.setTitle("Bot is pressed", for: .highlighted)
         buttonBot.setTitleColor(.purple, for: .highlighted)
-        
-        buttonTop.onTap = {
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        buttonBot.onTap = {
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
     }
 }
 

@@ -54,9 +54,12 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
         return text
     }()
     
-    let setStatusButton = MagicButton(title: "Set status", titleColor: .white) {
-        print("Set status button pressed...")
-        ProfileHeaderView().setupStatusButton()
+    lazy var setStatusButton = MagicButton(title: "Set status", titleColor: .white) { [self] in
+            print("Set status button pressed...")
+            (statusTextField.text == "" || statusTextField.text == nil) ?
+            (statusLabel.text = "Write something!") :
+            (statusLabel.text = statusTextField.text)
+            statusTextField.text = ""
     }
     
     override init(reuseIdentifier: String?) {
@@ -79,14 +82,6 @@ extension ProfileHeaderView {
         setStatusButton.layer.shadowOpacity = 0.7
         setStatusButton.layer.shadowOffset = CGSize(width: 4, height: 4)
         setStatusButton.layer.shadowColor = UIColor.black.cgColor
-        
-        setStatusButton.onTap = { [self] in
-            print("Set status button pressed...")
-            (statusTextField.text == "" || statusTextField.text == nil) ?
-            (statusLabel.text = "Write something!") :
-            (statusLabel.text = statusTextField.text)
-            statusTextField.text = ""
-        }
     }
 }
 

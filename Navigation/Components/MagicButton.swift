@@ -10,7 +10,7 @@ import UIKit
 
 final class MagicButton: UIButton {
     
-    var onTap: () -> Void
+    private let onTap: () -> Void
     
     init(title: String, titleColor: UIColor, onTap: @escaping () -> Void) {
         self.onTap = onTap

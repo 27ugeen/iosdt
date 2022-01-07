@@ -9,8 +9,6 @@ import UIKit
 
 class LogInViewController: UIViewController {
     
-    static let instance = LogInViewController(delegate: MyLoginFactory().createChecker())
-    
     var delegate: LoginViewControllerDelegate
     
     let scrollView: UIScrollView = {
@@ -70,8 +68,21 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    let loginButton = MagicButton(title: "Log In", titleColor: .white) {
-        instance.setupLoginButton()
+    lazy var loginButton = MagicButton(title: "Log In", titleColor: .white) {
+        var vc: ProfileViewController
+    #if DEBUG
+        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
+    #else
+        let name = self.loginTextField.text ?? ""
+        let password = self.passwordTextField.text ?? ""
+        let status: Bool = (self.delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
+        guard status else {
+            print("Try again")
+            return
+        }
+        vc = ProfileViewController(userService: CurrentUserService(), userName: name )
+    #endif
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     init(delegate: LoginViewControllerDelegate) {
@@ -109,29 +120,13 @@ extension LogInViewController {
     func setupLoginButton() {
         let backgroundImage = UIImage(named: "blue_pixel")
         let trasparentImage = backgroundImage!.alpha(0.8)
+        
         loginButton.setBackgroundImage(backgroundImage, for: .normal)
         loginButton.setBackgroundImage(trasparentImage, for: .selected)
         loginButton.setBackgroundImage(trasparentImage, for: .highlighted)
         loginButton.setBackgroundImage(trasparentImage, for: .disabled)
         loginButton.layer.cornerRadius = 10
         loginButton.clipsToBounds = true
-        
-        loginButton.onTap = {
-            var vc: ProfileViewController
-        #if DEBUG
-            vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
-        #else
-            let name = loginTextField.text ?? ""
-            let password = passwordTextField.text ?? ""
-            let status: Bool = (delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
-            guard status else {
-                print("Try again")
-                return
-            }
-            vc = ProfileViewController(userService: CurrentUserService(), userName: name )
-        #endif
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
     }
 }
 
