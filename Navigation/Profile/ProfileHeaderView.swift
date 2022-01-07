@@ -55,7 +55,7 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
     }()
     
     lazy var setStatusButton = MagicButton(title: "Set status", titleColor: .white) { [self] in
-            print("Set status button pressed...")
+            print("Setstatus button pressed...")
             (statusTextField.text == "" || statusTextField.text == nil) ?
             (statusLabel.text = "Write something!") :
             (statusLabel.text = statusTextField.text)

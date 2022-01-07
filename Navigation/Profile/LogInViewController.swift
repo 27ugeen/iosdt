@@ -69,6 +69,19 @@ class LogInViewController: UIViewController {
     }()
     
     lazy var loginButton = MagicButton(title: "Log In", titleColor: .white) {
+        self.goToProfile()
+    }
+    
+    init(delegate: LoginViewControllerDelegate) {
+        self.delegate = delegate
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        nil
+    }
+    
+    func goToProfile() {
         var vc: ProfileViewController
     #if DEBUG
         vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
@@ -83,15 +96,6 @@ class LogInViewController: UIViewController {
         vc = ProfileViewController(userService: CurrentUserService(), userName: name )
     #endif
         self.navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    init(delegate: LoginViewControllerDelegate) {
-        self.delegate = delegate
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        nil
     }
     
     override func viewDidLoad() {

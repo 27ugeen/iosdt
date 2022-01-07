@@ -49,7 +49,6 @@ class PhotosTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
-        //        layoutIfNeeded()
     }
     
     required init?(coder: NSCoder) {
@@ -61,7 +60,6 @@ class PhotosTableViewCell: UITableViewCell {
         if buttonView.currentBackgroundImage == UIImage(systemName: "arrow.right") {
             let IndexPath = NSIndexPath(item: 7, section: 0)
             photosPreview.scrollToItem(at: IndexPath as IndexPath, at: .right, animated: true)
-//            print("button nextImages has tapped")
             buttonView.setBackgroundImage(UIImage(systemName: "arrow.left"), for: .normal)
         } else {
             let IndexPath = NSIndexPath(item: 0, section: 0)
@@ -78,8 +76,6 @@ extension PhotosTableViewCell {
         contentView.addSubview(titleLableView)
         contentView.addSubview(buttonView)
         contentView.addSubview(photosPreview)
-        
-        //        let photoWidth = (contentView.bounds.width - 3 * 8 + 2 * 12) / 4
         
         let constraints = [
             titleLableView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
@@ -121,8 +117,6 @@ extension PhotosTableViewCell: UICollectionViewDataSource {
 
 extension PhotosTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
-        //        let photoWidth = CGFloat(collectionView.bounds.width - 3 * 8 + 2 * 12) / 4
         
         return CGSize(width: photoWidth, height: photoWidth)
     }
