@@ -7,19 +7,14 @@
 
 import UIKit
 import iOSIntPackage
+import SnapKit
 
 class PhotosViewController: UIViewController {
     
     var imagePublisherFacade = ImagePublisherFacade()
     
-//    let userImages = ImgStorage.arrImg
-    
     private var userImages: [UIImage]? {
-        
         didSet {
-//            let photosStorage = PhotosStorage()
-//            let userArrayImages = UserImagesArray()
-//            userPhoto = userArrayImages.recivePhotos(photos: photosStorage)
             collectionView.reloadData()
         }
     }
@@ -46,7 +41,7 @@ class PhotosViewController: UIViewController {
         setupViews()
         
         imagePublisherFacade.subscribe(self)
-        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: 18, userImages: ImgStorage.arrImg)
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
         
         self.title = "Photo Gallery"
     }
@@ -62,7 +57,6 @@ class PhotosViewController: UIViewController {
         
         let button = UIBarButtonItem(image: UIImage(systemName: "plus"), style: UIBarButtonItem.Style.done, target: self, action: nil)
         self.navigationItem.setRightBarButtonItems([button], animated: true)
-//        imagePublisherFacade.addImagesWithTimer(time: 2, repeat: 18, userImages: ImgStorage.arrImg)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -94,30 +88,20 @@ extension PhotosViewController: ImageLibrarySubscriber {
     }
 }
 
-
 extension PhotosViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        return PhotosStorage.tableModel.count
-        return 1
-//        return userPhoto?.count ?? 1
-//        if let section = dataSource?.count {
-//            return section
-//        } else {
-//            return 0
-//        }
+        return PhotosStorage.tableModel.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return PhotosStorage.tableModel[section].photos.count
-        return userImages?.count ?? 1
+        return userImages?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
-//        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.row]
-//        let cell = UICollectionViewCell()
-        cell.photo = ImgStorage.arrImg.first
+        
+        cell.imageView.image = ImgStorage.arrImg[indexPath.row]
         return cell
     }
 }

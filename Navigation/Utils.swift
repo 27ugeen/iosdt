@@ -17,6 +17,17 @@ public func putFilterOnImage(_ image: UIImage, _ filterOn: ColorFilter) -> UIIma
     return filteredImage ?? image
 }
 
+public func reciveImagesArrFromPhotoStorage(photos: AnyObject) -> [UIImage] {
+    var imageArray: [UIImage] = []
+    
+         PhotosStorage.tableModel.forEach { PhotosSection in
+             PhotosSection.photos.forEach { Photo in
+                 imageArray.append(Photo.image)
+             }
+         }
+    return imageArray
+}
+
 extension UIImage {
     func alpha(_ value:CGFloat) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)

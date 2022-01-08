@@ -9,19 +9,6 @@ import UIKit
 
 class PhotosCollectionViewCell: UICollectionViewCell {
     
-//    var photo: Photo? {
-//        didSet {
-//            imageView.image = photo?.image
-//        }
-//    }
-    
-    var photo: UIImage? {
-        didSet {
-            imageView.image = ImgStorage.arrImg.randomElement()
-        }
-    }
-
-    
     let imageView: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
