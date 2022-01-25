@@ -11,7 +11,7 @@ import SnapKit
 
 class PhotosViewController: UIViewController {
     
-    var imagePublisherFacade = ImagePublisherFacade()
+    private var imagePublisherFacade = ImagePublisherFacade()
     
     private var userImages: [UIImage]? {
         didSet {
@@ -40,8 +40,28 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
+        var cgImages = ImgStorage.arrImg.map {
+            image in
+            return image.cgImage
+        }
+        
+        var userImgOnThread: [UIImage]?
+        
+        ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .noir, qos: .background) {
+            processedImages in
+            cgImages = processedImages
+            userImgOnThread = cgImages.map {
+                image in
+                return UIImage(cgImage: image!)
+            }
+        }
+        
+        
+        
         imagePublisherFacade.subscribe(self)
-        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: userImgOnThread)
+        
+        
         
         self.title = "Photo Gallery"
     }
@@ -101,7 +121,7 @@ extension PhotosViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
         
-        cell.imageView.image = ImgStorage.arrImg[indexPath.row]
+        cell.imageView.image = userImages?[indexPath.row]
         return cell
     }
 }
