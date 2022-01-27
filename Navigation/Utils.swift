@@ -17,7 +17,7 @@ public func putFilterOnImage(_ image: UIImage, _ filterOn: ColorFilter) -> UIIma
     return filteredImage ?? image
 }
 
-public func putFilterOnImageonThread(_ images: [UIImage], _ filterOn: ColorFilter, _ qualityOfService: QualityOfService) -> [UIImage] {
+public func putFilterOnImageOnThread(_ images: [UIImage], _ filterOn: ColorFilter, _ qualityOfService: QualityOfService) -> [UIImage] {
     var cgImages: [CGImage?]
     cgImages = images.map {
         image in
