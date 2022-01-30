@@ -40,11 +40,6 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
-        var cgImages = ImgStorage.arrImg.map {
-            image in
-            return image.cgImage
-        }
-        
         imagePublisherFacade.subscribe(self)
         imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
         
@@ -105,8 +100,35 @@ extension PhotosViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
+        //=====================
+//        var filteredImage: UIImage?
+//                ImageProcessor().processImage(sourceImage: ImgStorage.arrImg[indexPath.item], filter: .colorInvert) {
+//                    processedImage in
+//                    filteredImage = processedImage
+//                }
+        //        cell.imageView.image = filteredImage
+        //======================
         
-        cell.imageView.image = userImages?[indexPath.row]
+        var userCgImage: [CGImage?]?
+
+        ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .fade, qos: .userInitiated) {
+            processedImages in
+            userCgImage = processedImages
+        }
+        
+        /*
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .noir, qos: .default)--9.63
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .chrome, qos: .utility)--16.51
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .colorInvert, qos: .utility)--13.10
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .colorInvert, qos: .userInteractive)--12.07
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .tonal, qos: .background)--14.72
+         ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .fade, qos: .userInitiated)--16.39
+         */
+
+//        filteredImage = UIImage(cgImage: (userCgImage?[indexPath.item]) as! CGImage)
+//        cell.imageView.image = filteredImage
+        
+        cell.imageView.image = userImages?[indexPath.item]
         return cell
     }
 }
