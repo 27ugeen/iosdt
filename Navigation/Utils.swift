@@ -18,18 +18,14 @@ public func putFilterOnImage(_ image: UIImage, _ filterOn: ColorFilter) -> UIIma
 }
 
 public func putFilterOnImageOnThread(_ images: [UIImage], _ filterOn: ColorFilter, _ qualityOfService: QualityOfService) -> [UIImage] {
-    var cgImages: [CGImage?]
-    cgImages = images.map {
-        image in
-        return image.cgImage
-    }
+    var cgImages: [CGImage?]?
     ImageProcessor().processImagesOnThread(sourceImages: images, filter: filterOn, qos: qualityOfService) { processedImages in
         cgImages = processedImages
     }
     return cgImages.map {
         image in
-        return UIImage(cgImage: image!)
-    }
+        return [UIImage(cgImage: image as! CGImage)]
+    } as! [UIImage]
 }
 
 public func reciveImagesArrFromPhotoStorage(photos: AnyObject) -> [UIImage] {

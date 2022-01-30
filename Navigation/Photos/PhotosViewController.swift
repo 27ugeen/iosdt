@@ -45,23 +45,8 @@ class PhotosViewController: UIViewController {
             return image.cgImage
         }
         
-        var userImgOnThread: [UIImage]?
-        
-        ImageProcessor().processImagesOnThread(sourceImages: ImgStorage.arrImg, filter: .noir, qos: .background) {
-            processedImages in
-            cgImages = processedImages
-            userImgOnThread = cgImages.map {
-                image in
-                return UIImage(cgImage: image!)
-            }
-        }
-        
-        
-        
         imagePublisherFacade.subscribe(self)
-        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: userImgOnThread)
-        
-        
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
         
         self.title = "Photo Gallery"
     }
