@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		11097B5D272604F800219C85 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11097B5C272604F800219C85 /* Utils.swift */; };
 		111ADF4B27242CD100C2C91D /* iOSIntPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 111ADF4A27242CD100C2C91D /* iOSIntPackage */; };
+		1121494727B0324900BCF0A7 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1121494627B0324900BCF0A7 /* NetworkService.swift */; };
 		112A120B26A6156D005F46A6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112A120A26A6156D005F46A6 /* AppDelegate.swift */; };
 		112A120D26A6156D005F46A6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112A120C26A6156D005F46A6 /* SceneDelegate.swift */; };
 		112A120F26A6156D005F46A6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112A120E26A6156D005F46A6 /* ViewController.swift */; };
@@ -35,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		11097B5C272604F800219C85 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		1121494627B0324900BCF0A7 /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		112A120726A6156D005F46A6 /* Navigation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Navigation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		112A120A26A6156D005F46A6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		112A120C26A6156D005F46A6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				112A120C26A6156D005F46A6 /* SceneDelegate.swift */,
 				11097B5C272604F800219C85 /* Utils.swift */,
 				112A120E26A6156D005F46A6 /* ViewController.swift */,
+				1121494627B0324900BCF0A7 /* NetworkService.swift */,
 				112A121326A6156F005F46A6 /* Assets.xcassets */,
 				112A121526A6156F005F46A6 /* LaunchScreen.storyboard */,
 				112A121826A6156F005F46A6 /* Info.plist */,
@@ -329,6 +332,7 @@
 				1151E50D278877ED00DA0BB3 /* FeedViewModel.swift in Sources */,
 				11097B5D272604F800219C85 /* Utils.swift in Sources */,
 				112A123326A758FD005F46A6 /* ProfileViewController.swift in Sources */,
+				1121494727B0324900BCF0A7 /* NetworkService.swift in Sources */,
 				112A123126A758E3005F46A6 /* FeedViewController.swift in Sources */,
 				112A123726A7666C005F46A6 /* Post.swift in Sources */,
 				112A123926A76A48005F46A6 /* InfoViewController.swift in Sources */,
