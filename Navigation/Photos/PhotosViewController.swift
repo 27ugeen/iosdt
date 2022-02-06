@@ -40,11 +40,6 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
-        var cgImages = ImgStorage.arrImg.map {
-            image in
-            return image.cgImage
-        }
-        
         imagePublisherFacade.subscribe(self)
         imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
         
