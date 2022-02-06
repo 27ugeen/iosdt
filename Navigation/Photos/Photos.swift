@@ -16,7 +16,7 @@ struct PhotosSection {
     let photos: [Photo]
 }
 
-struct PhotosStorage {
+class PhotosStorage {
     static let tableModel = [
         PhotosSection(photos: [Photo(image: #imageLiteral(resourceName: "bmw")), Photo(image: #imageLiteral(resourceName: "beach")), Photo(image: #imageLiteral(resourceName: "dog-")), Photo(image: #imageLiteral(resourceName: "ocean")),
                                Photo(image: #imageLiteral(resourceName: "zakynthos")), Photo(image: #imageLiteral(resourceName: "cat")), Photo(image: #imageLiteral(resourceName: "woman2")), Photo(image: #imageLiteral(resourceName: "drop")),
@@ -31,4 +31,8 @@ struct PhotosStorage {
                                Photo(image: #imageLiteral(resourceName: "waves")), Photo(image: #imageLiteral(resourceName: "the-sun"))
         ])
     ]
+}
+
+struct ImgStorage {
+    static let arrImg = reciveImagesArrFromPhotoStorage(photos: PhotosStorage.self)
 }

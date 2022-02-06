@@ -6,8 +6,18 @@
 //
 
 import UIKit
+import iOSIntPackage
+import SnapKit
 
 class PhotosViewController: UIViewController {
+    
+    private var imagePublisherFacade = ImagePublisherFacade()
+    
+    private var userImages: [UIImage]? {
+        didSet {
+            collectionView.reloadData()
+        }
+    }
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -30,7 +40,20 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
+        var cgImages = ImgStorage.arrImg.map {
+            image in
+            return image.cgImage
+        }
+        
+        imagePublisherFacade.subscribe(self)
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
+        
         self.title = "Photo Gallery"
+    }
+    
+    deinit {
+        imagePublisherFacade.rechargeImageLibrary()
+        imagePublisherFacade.removeSubscription(for: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -64,6 +87,12 @@ extension PhotosViewController {
     }
 }
 
+extension PhotosViewController: ImageLibrarySubscriber {
+    func receive(images: [UIImage]) {
+        userImages = images
+    }
+}
+
 extension PhotosViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -71,12 +100,13 @@ extension PhotosViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return PhotosStorage.tableModel[section].photos.count
+        return userImages?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
-        cell.photo = PhotosStorage.tableModel[indexPath.section].photos[indexPath.row]
+        
+        cell.imageView.image = userImages?[indexPath.row]
         return cell
     }
 }
@@ -105,3 +135,5 @@ extension PhotosViewController: UICollectionViewDelegateFlowLayout {
         print("Photo Gallery: item: \(indexPath.item)")
     }
 }
+
+
