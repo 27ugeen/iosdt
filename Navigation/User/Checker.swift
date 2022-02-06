@@ -26,5 +26,3 @@ class Checker {
         return true
     }
 }
-
-let checkerInstance = Checker.instance

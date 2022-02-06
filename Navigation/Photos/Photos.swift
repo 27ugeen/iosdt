@@ -33,29 +33,6 @@ class PhotosStorage {
     ]
 }
 
-
-
-//class UserImagesArray {
-//    public static let shared = UserImagesArray()
-//
-//    func recivePhotos(photos: AnyObject) -> [UIImage] {
-//       var imageArray: [UIImage] = []
-//
-//        if photos is PhotosStorage {
-//            PhotosStorage.tableModel.forEach { PhotosSection in
-//                PhotosSection.photos.forEach { Photo in
-//                    imageArray.append(Photo.image)
-//                    print(Photo.image.hashValue)
-//                }
-//            }
-//        }
-//       return imageArray
-//   }
-//}
-
-//let instance = UserImagesArray()
-
-
 struct ImgStorage {
     static let arrImg = [#imageLiteral(resourceName: "macroperspective"), #imageLiteral(resourceName: "rock"), #imageLiteral(resourceName: "sea-shell"), #imageLiteral(resourceName: "ocean"), #imageLiteral(resourceName: "kingfisher"), #imageLiteral(resourceName: "wolf"), #imageLiteral(resourceName: "drop"), #imageLiteral(resourceName: "bmw-i8"), #imageLiteral(resourceName: "tree"), #imageLiteral(resourceName: "bmw")]
     

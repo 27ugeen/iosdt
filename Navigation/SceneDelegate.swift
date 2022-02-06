@@ -11,6 +11,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     
+    let loginInspector = MyLoginFactory().createChecker()
+    let feedViewModel = FeedViewModel()
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
         guard let scene = (scene as? UIWindowScene) else { return }
@@ -19,9 +22,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let tabBarController = UITabBarController()
         
-        let feedVC = FeedViewController()
+        let feedVC = FeedViewController(viewModel: feedViewModel)
         
-        let loginVC = LogInViewController()
+        let loginVC = LogInViewController(delegate: loginInspector)
         loginVC.title = "Profile"
         
         let feedNavVC = UINavigationController(rootViewController: feedVC)
@@ -29,14 +32,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let loginNavVC = UINavigationController(rootViewController: loginVC)
         
-        let loginFactory = MyLoginFactory().self
-        let checkedUser = loginFactory.checkUserLogin()
-        loginNavVC.delegate = checkedUser as? UINavigationControllerDelegate
-        
         loginNavVC.isNavigationBarHidden = true
-        
         loginNavVC.tabBarItem = UITabBarItem(title: loginVC.title, image: UIImage(systemName: "person.fill"), tag: 1)
-        
         
         tabBarController.viewControllers = [feedNavVC, loginNavVC]
         
@@ -44,4 +41,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
 }
-
