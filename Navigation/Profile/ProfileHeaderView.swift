@@ -54,38 +54,34 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
         return text
     }()
     
-    let setStatusButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .systemBlue.withAlphaComponent(0.7)
-        button.layer.cornerRadius = 14
-        button.setTitle("Set status", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.setTitleColor(.purple, for: .highlighted)
-        button.layer.shadowRadius = 4
-        button.layer.shadowOpacity = 0.7
-        button.layer.shadowOffset = CGSize(width: 4, height: 4)
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.addTarget(self, action: #selector(setStatusButtonPressed), for: .touchUpInside)
-        return button
-    }()
+    lazy var setStatusButton = MagicButton(title: "Set status", titleColor: .white) { [self] in
+            print("Setstatus button pressed...")
+            (statusTextField.text == "" || statusTextField.text == nil) ?
+            (statusLabel.text = "Write something!") :
+            (statusLabel.text = statusTextField.text)
+            statusTextField.text = ""
+    }
     
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
+        setupStatusButton()
         setupViews()
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
-    
-    @objc
-    private func setStatusButtonPressed() {
-        print("Set status button pressed...")
-        (statusTextField.text == "" || statusTextField.text == nil) ?
-        (statusLabel.text = "Write something!") :
-        (statusLabel.text = statusTextField.text)
-        statusTextField.text = ""
+}
+
+extension ProfileHeaderView {
+    private func setupStatusButton() {
+        setStatusButton.setTitleColor(.purple, for: .highlighted)
+        setStatusButton.backgroundColor = .systemBlue.withAlphaComponent(0.7)
+        setStatusButton.layer.cornerRadius = 14
+        setStatusButton.layer.shadowRadius = 4
+        setStatusButton.layer.shadowOpacity = 0.7
+        setStatusButton.layer.shadowOffset = CGSize(width: 4, height: 4)
+        setStatusButton.layer.shadowColor = UIColor.black.cgColor
     }
 }
 
