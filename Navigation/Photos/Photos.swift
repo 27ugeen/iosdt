@@ -34,10 +34,5 @@ class PhotosStorage {
 }
 
 struct ImgStorage {
-    static let arrImg = [#imageLiteral(resourceName: "macroperspective"), #imageLiteral(resourceName: "rock"), #imageLiteral(resourceName: "sea-shell"), #imageLiteral(resourceName: "ocean"), #imageLiteral(resourceName: "kingfisher"), #imageLiteral(resourceName: "wolf"), #imageLiteral(resourceName: "drop"), #imageLiteral(resourceName: "bmw-i8"), #imageLiteral(resourceName: "tree"), #imageLiteral(resourceName: "bmw")]
-    
-    static var imageIterator = arrImg.makeIterator()
-    
+    static let arrImg = reciveImagesArrFromPhotoStorage(photos: PhotosStorage.self)
 }
-
-

@@ -17,6 +17,28 @@ public func putFilterOnImage(_ image: UIImage, _ filterOn: ColorFilter) -> UIIma
     return filteredImage ?? image
 }
 
+public func putFilterOnImageOnThread(_ images: [UIImage], _ filterOn: ColorFilter, _ qualityOfService: QualityOfService) -> [UIImage] {
+    var cgImages: [CGImage?]?
+    ImageProcessor().processImagesOnThread(sourceImages: images, filter: filterOn, qos: qualityOfService) { processedImages in
+        cgImages = processedImages
+    }
+    return cgImages.map {
+        image in
+        return [UIImage(cgImage: image as! CGImage)]
+    } as! [UIImage]
+}
+
+public func reciveImagesArrFromPhotoStorage(photos: AnyObject) -> [UIImage] {
+    var imageArray: [UIImage] = []
+    
+         PhotosStorage.tableModel.forEach { PhotosSection in
+             PhotosSection.photos.forEach { Photo in
+                 imageArray.append(Photo.image)
+             }
+         }
+    return imageArray
+}
+
 extension UIImage {
     func alpha(_ value:CGFloat) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)

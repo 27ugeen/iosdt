@@ -7,13 +7,13 @@
 
 import UIKit
 import iOSIntPackage
+import SnapKit
 
 class PhotosViewController: UIViewController {
     
-    var imagePublisherFacade = ImagePublisherFacade()
+    private var imagePublisherFacade = ImagePublisherFacade()
     
     private var userImages: [UIImage]? {
-        
         didSet {
             collectionView.reloadData()
         }
@@ -40,8 +40,13 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         
+        var cgImages = ImgStorage.arrImg.map {
+            image in
+            return image.cgImage
+        }
+        
         imagePublisherFacade.subscribe(self)
-        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: 18, userImages: ImgStorage.arrImg)
+        imagePublisherFacade.addImagesWithTimer(time: 1, repeat: ImgStorage.arrImg.count , userImages: ImgStorage.arrImg)
         
         self.title = "Photo Gallery"
     }
@@ -88,11 +93,10 @@ extension PhotosViewController: ImageLibrarySubscriber {
     }
 }
 
-
 extension PhotosViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        return PhotosStorage.tableModel.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -101,7 +105,8 @@ extension PhotosViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PhotosCollectionViewCell.self), for: indexPath) as! PhotosCollectionViewCell
-        cell.photo = ImgStorage.arrImg.first
+        
+        cell.imageView.image = userImages?[indexPath.row]
         return cell
     }
 }
