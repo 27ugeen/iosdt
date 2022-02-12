@@ -9,18 +9,12 @@ import UIKit
 
 class InfoViewController: UIViewController {
     
-    let residentURLs: [String] = [
-        "https://swapi.dev/api/people/1/",
-        "https://swapi.dev/api/people/2/",
-        "https://swapi.dev/api/people/4/",
-        "https://swapi.dev/api/people/6/",
-        "https://swapi.dev/api/people/7/",
-        "https://swapi.dev/api/people/8/",
-        "https://swapi.dev/api/people/9/",
-        "https://swapi.dev/api/people/11/",
-        "https://swapi.dev/api/people/43/",
-        "https://swapi.dev/api/people/62/"
-    ]
+    enum userURLs: String {
+        case planets = "https://swapi.dev/api/planets/1"
+        case todos = "https://jsonplaceholder.typicode.com/todos/41"
+    }
+    
+    var planetInfoModel: PlanetInfoModel?
     
     lazy var infoButtton = MagicButton(title: "dont touch me!!!", titleColor: .white) {
         self.buttonPressed()
@@ -52,13 +46,14 @@ class InfoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        decodeStringFromData(costumURL: "https://swapi.dev/api/planets/1", modelType: PlanetInfoModel.self) { model in
+        decodeStringFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
+            self.planetInfoModel = model
             DispatchQueue.main.async {
                 self.orbitalPeriodLabel.text = "Orbital period is: " + model.orbitalPerion + " solar days"
             }
         }
         
-        serializeStringFromData(costumURL: "https://jsonplaceholder.typicode.com/todos/41") { title in
+        serializeStringFromData(costumURL: userURLs.todos.rawValue) { title in
             DispatchQueue.main.async {
                 self.infoLabel.text = title
             }
@@ -66,6 +61,10 @@ class InfoViewController: UIViewController {
         
         setupViews()
         setupTableView()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        print("Residents: \(String(describing: planetInfoModel?.residents))")
     }
     
     func buttonPressed() {
@@ -157,14 +156,20 @@ extension InfoViewController {
 
 extension InfoViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        residentURLs.count
+        self.planetInfoModel?.residents.count ?? 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: InfoTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: InfoTableViewCell.self), for: indexPath) as! InfoTableViewCell
-        decodeStringFromData(costumURL: residentURLs[indexPath.row], modelType: ResidentsModel.self) { model in
-            DispatchQueue.main.async {
-                cell.label.text = model.name
+
+        decodeStringFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
+            self.planetInfoModel = model
+            if let urls = self.planetInfoModel?.residents {
+                self.decodeStringFromData(costumURL: urls[indexPath.row], modelType: ResidentsModel.self) { model in
+                    DispatchQueue.main.async {
+                        cell.label.text = model.name
+                    }
+                }
             }
         }
         return cell
