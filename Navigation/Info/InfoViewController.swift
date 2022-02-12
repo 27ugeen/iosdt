@@ -9,7 +9,18 @@ import UIKit
 
 class InfoViewController: UIViewController {
     
-//    let infoNetworkService = InfoNetworkService()
+    let residentURLs: [String] = [
+        "https://swapi.dev/api/people/1/",
+        "https://swapi.dev/api/people/2/",
+        "https://swapi.dev/api/people/4/",
+        "https://swapi.dev/api/people/6/",
+        "https://swapi.dev/api/people/7/",
+        "https://swapi.dev/api/people/8/",
+        "https://swapi.dev/api/people/9/",
+        "https://swapi.dev/api/people/11/",
+        "https://swapi.dev/api/people/43/",
+        "https://swapi.dev/api/people/62/"
+    ]
     
     lazy var infoButtton = MagicButton(title: "dont touch me!!!", titleColor: .white) {
         self.buttonPressed()
@@ -36,73 +47,28 @@ class InfoViewController: UIViewController {
         return label
     }()
     
+    let tableView = UITableView(frame: .zero, style: .grouped)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let queueInfoLabel = DispatchQueue(label: "InfoLabel")
-        let queueOrbitalPeriodLabel = DispatchQueue(label: "orbitalPeriodLabel")
+        decodeStringFromData(costumURL: "https://swapi.dev/api/planets/1", modelType: PlanetInfoModel.self) { model in
+            DispatchQueue.main.async {
+                self.orbitalPeriodLabel.text = "Orbital period is: " + model.orbitalPerion + " solar days"
+            }
+        }
         
-        queueOrbitalPeriodLabel.async {
-            var period = "0"
-            
-            if let url = URL(string: "https://swapi.dev/api/planets/1") {
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                    if let unwrappedData = data {
-                        do{
-                            let planetInfo = try JSONDecoder().decode(PlanetInfoModel.self, from: unwrappedData)
-                            print("Data: \(planetInfo)")
-                            period = planetInfo.orbitalPerion
-                            
-                            DispatchQueue.main.async {
-                                self.orbitalPeriodLabel.text = "Orbital period is: " + period + " solar days"
-                                print("Orbital period is: \(period)")
-                            }
-                        }
-                        catch let error {
-                            print("Error: \(error)")
-                        }
-                    }
-                    
-                }
-                task.resume()
-            } else {
-                print("Can't create URL")
+        serializeStringFromData(costumURL: "https://jsonplaceholder.typicode.com/todos/41") { title in
+            DispatchQueue.main.async {
+                self.infoLabel.text = title
             }
         }
-        queueInfoLabel.async {
-            var userLabel = "test"
-
-            if let url = URL(string: "https://jsonplaceholder.typicode.com/todos/41") {
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                    if let unwrappedData = data {
-                        do {
-                            let serializedData = try JSONSerialization.jsonObject(with: unwrappedData, options: [])
-                            if let dict = serializedData as? [String: Any],
-                               let title = dict["title"] as? String {
-
-                                userLabel = title
-
-                                DispatchQueue.main.async {
-                                    self.infoLabel.text = userLabel
-                                    print("label is: \(userLabel)")
-                                }
-                            }
-                        }
-                        catch let error {
-                            print(error.localizedDescription)
-                        }
-                    }
-                }
-                task.resume()
-            } else {
-                print("Can't create URL")
-            }
-        }
+        
         setupViews()
+        setupTableView()
     }
     
     func buttonPressed() {
-        
         let alertVC = UIAlertController(title: "Error", message: "Something wrong!", preferredStyle: .alert)
         let actionOk = UIAlertAction(title: "OK", style: .cancel) { _ in
             print("Destroyed!")
@@ -114,6 +80,47 @@ class InfoViewController: UIViewController {
         alertVC.addAction(actionCancel)
         self.present(alertVC, animated: true, completion: nil)
     }
+    
+    func serializeStringFromData(costumURL: String, completition: @escaping (String) -> Void){
+        if let url = URL(string: costumURL) {
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let unwrappedData = data {
+                    do {
+                        let serializedData = try JSONSerialization.jsonObject(with: unwrappedData, options: [])
+                        if let dict = serializedData as? [String: Any],
+                           let title = dict["title"] as? String {
+                            completition(title)
+                        }
+                    } catch let error { print(error) }
+                }
+            }
+            task.resume()
+        } else { print("Can't create URL") }
+    }
+    
+    func decodeStringFromData<T: Decodable>(costumURL: String, modelType: T.Type, completition: @escaping (T) -> Void) {
+        if let url = URL(string: costumURL) {
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let unwrappedData = data {
+                    do {
+                        let planetInfo = try JSONDecoder().decode(modelType, from: unwrappedData)
+                        completition(planetInfo)
+                    }
+                    catch let error { print("Error: \(error)") }
+                }
+            }
+            task.resume()
+        } else { print("Can't create URL") }
+    }
+}
+
+extension InfoViewController {
+    func setupTableView() {
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(InfoTableViewCell.self, forCellReuseIdentifier: String(describing: InfoTableViewCell.self))
+        tableView.dataSource = self
+    }
 }
 
 extension InfoViewController {
@@ -124,6 +131,7 @@ extension InfoViewController {
         self.view.addSubview(infoButtton)
         self.view.addSubview(infoLabel)
         self.view.addSubview(orbitalPeriodLabel)
+        self.view.addSubview(tableView)
         
         let constraints = [
             infoButtton.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
@@ -137,136 +145,67 @@ extension InfoViewController {
             orbitalPeriodLabel.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 10),
             orbitalPeriodLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             orbitalPeriodLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            
+            tableView.topAnchor.constraint(equalTo: orbitalPeriodLabel.bottomAnchor, constant: 10),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
     }
 }
 
-//{
-//    "userId": 3,
-//    "id": 42,
-//    "title": "rerum perferendis error quia ut eveniet",
-//    "completed": false
-//  },
-
-struct UserModel: Codable {
-    let userId: Int
-    let id: Int
-    let title: String
-    let completed: Bool
-    
-    enum CodingKeys: String, CodingKey {
-        case userId
-        case id
-        case title
-        case completed
+extension InfoViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        residentURLs.count
     }
     
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        userId = try container.decode(Int.self, forKey: .userId)
-        id = try container.decode(Int.self, forKey: .id)
-        title = try container.decode(String.self, forKey: .title)
-        completed = try container.decode(Bool.self, forKey: .completed)
-    }
-}
-
-
-class InfoNetworkService {
-    
-    lazy var infoLabel: String = "tttt"
-    
-    func startTask(requestUrl: String) {
-        if let url = URL(string: requestUrl) {
-            
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                
-                if let unwrappedData = data {
-                    do {
-                        let serializedData = try JSONSerialization.jsonObject(with: unwrappedData, options: [])
-                        
-                        if let dict = serializedData as? [String: Any],
-                           let title = dict["title"] as? String {
-                            
-                            self.infoLabel = title
-                        }
-                    }
-                    catch let error {
-                        print(error.localizedDescription)
-                    }
-                }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell: InfoTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: InfoTableViewCell.self), for: indexPath) as! InfoTableViewCell
+        decodeStringFromData(costumURL: residentURLs[indexPath.row], modelType: ResidentsModel.self) { model in
+            DispatchQueue.main.async {
+                cell.label.text = model.name
             }
-            task.resume()
-        } else {
-            print("Can't create URL")
         }
+        return cell
     }
 }
 
 struct PlanetInfoModel: Codable {
     let name: String
-//    let rotationPeriod: Int
     let orbitalPerion: String
     let diameter: String
-//    let climate: String
-//    let gravity: String
-//    let terrain: String
-//    let surfaceWater: Int
     let population: String
+    var residents: [String]
     
     enum CodingKeys: String, CodingKey {
         case name
-//        case rotationPeriod = "rotation_period"
         case orbitalPerion = "orbital_period"
         case diameter
-//        case climate
-//        case gravity
-//        case terrian
-//        case surfaceWater = "surface_water"
         case population
+        case residents
     }
     
     init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let values = try decoder.container(keyedBy: CodingKeys.self)
         
-        name = try container.decode(String.self, forKey: .name)
-        orbitalPerion = try container.decode(String.self, forKey: .orbitalPerion)
-        diameter = try container.decode(String.self, forKey: .diameter)
-        population = try container.decode(String.self, forKey: .population)
+        name = try values.decode(String.self, forKey: .name)
+        orbitalPerion = try values.decode(String.self, forKey: .orbitalPerion)
+        diameter = try values.decode(String.self, forKey: .diameter)
+        population = try values.decode(String.self, forKey: .population)
+        residents = try values.decode([String].self, forKey: .residents)
     }
 }
 
-//{
-//    "name": "Tatooine",
-//    "rotation_period": "23",
-//    "orbital_period": "304",
-//    "diameter": "10465",
-//    "climate": "arid",
-//    "gravity": "1 standard",
-//    "terrain": "desert",
-//    "surface_water": "1",
-//    "population": "200000",
-//    "residents": [
-//        "https://swapi.dev/api/people/1/",
-//        "https://swapi.dev/api/people/2/",
-//        "https://swapi.dev/api/people/4/",
-//        "https://swapi.dev/api/people/6/",
-//        "https://swapi.dev/api/people/7/",
-//        "https://swapi.dev/api/people/8/",
-//        "https://swapi.dev/api/people/9/",
-//        "https://swapi.dev/api/people/11/",
-//        "https://swapi.dev/api/people/43/",
-//        "https://swapi.dev/api/people/62/"
-//    ],
-//    "films": [
-//        "https://swapi.dev/api/films/1/",
-//        "https://swapi.dev/api/films/3/",
-//        "https://swapi.dev/api/films/4/",
-//        "https://swapi.dev/api/films/5/",
-//        "https://swapi.dev/api/films/6/"
-//    ],
-//    "created": "2014-12-09T13:50:49.641000Z",
-//    "edited": "2014-12-20T20:58:18.411000Z",
-//    "url": "https://swapi.dev/api/planets/1/"
-//}
+struct ResidentsModel: Codable {
+    var name: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+    
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try values.decode(String.self, forKey: .name)
+    }
+}
