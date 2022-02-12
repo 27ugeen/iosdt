@@ -46,16 +46,16 @@ class InfoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        decodeStringFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
+        decodeModelFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
             self.planetInfoModel = model
             DispatchQueue.main.async {
                 self.orbitalPeriodLabel.text = "Orbital period is: " + model.orbitalPerion + " solar days"
             }
         }
         
-        serializeStringFromData(costumURL: userURLs.todos.rawValue) { title in
+        serializeValueFromData(costumURL: userURLs.todos.rawValue, value: "title") { value in
             DispatchQueue.main.async {
-                self.infoLabel.text = title
+                self.infoLabel.text = value
             }
         }
         
@@ -80,14 +80,14 @@ class InfoViewController: UIViewController {
         self.present(alertVC, animated: true, completion: nil)
     }
     
-    func serializeStringFromData(costumURL: String, completition: @escaping (String) -> Void){
+    func serializeValueFromData(costumURL: String, value: String, completition: @escaping (String) -> Void){
         if let url = URL(string: costumURL) {
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let unwrappedData = data {
                     do {
                         let serializedData = try JSONSerialization.jsonObject(with: unwrappedData, options: [])
                         if let dict = serializedData as? [String: Any],
-                           let title = dict["title"] as? String {
+                           let title = dict[value] as? String {
                             completition(title)
                         }
                     } catch let error { print(error) }
@@ -97,13 +97,13 @@ class InfoViewController: UIViewController {
         } else { print("Can't create URL") }
     }
     
-    func decodeStringFromData<T: Decodable>(costumURL: String, modelType: T.Type, completition: @escaping (T) -> Void) {
+    func decodeModelFromData<T: Decodable>(costumURL: String, modelType: T.Type, completition: @escaping (T) -> Void) {
         if let url = URL(string: costumURL) {
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let unwrappedData = data {
                     do {
-                        let planetInfo = try JSONDecoder().decode(modelType, from: unwrappedData)
-                        completition(planetInfo)
+                        let modelInfo = try JSONDecoder().decode(modelType, from: unwrappedData)
+                        completition(modelInfo)
                     }
                     catch let error { print("Error: \(error)") }
                 }
@@ -162,10 +162,10 @@ extension InfoViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: InfoTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: InfoTableViewCell.self), for: indexPath) as! InfoTableViewCell
 
-        decodeStringFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
+        decodeModelFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
             self.planetInfoModel = model
             if let urls = self.planetInfoModel?.residents {
-                self.decodeStringFromData(costumURL: urls[indexPath.row], modelType: ResidentsModel.self) { model in
+                self.decodeModelFromData(costumURL: urls[indexPath.row], modelType: ResidentsModel.self) { model in
                     DispatchQueue.main.async {
                         cell.label.text = model.name
                     }
