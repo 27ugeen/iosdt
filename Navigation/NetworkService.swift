@@ -29,21 +29,16 @@ struct NetworkService {
                 
                 if let httpUrlRespose = response as? HTTPURLResponse {
                     print("Status code is: \(httpUrlRespose.statusCode)") // status code
-                    
-                    let headers = try! JSONSerialization.data(withJSONObject: httpUrlRespose.allHeaderFields, options: .prettyPrinted)
-                    
-                    if let JSONHeaders = String(data: headers, encoding: .utf8) {
-                        print("Server's Headers are: \(JSONHeaders)") // all headers
+                    do {
+                        let headers = try JSONSerialization.data(withJSONObject: httpUrlRespose.allHeaderFields, options: .prettyPrinted)
+                        
+                        if let JSONHeaders = String(data: headers, encoding: .utf8) {
+                            print("Server's Headers are: \(JSONHeaders)") // all headers
+                        }
                     }
-                    /*
-                     //можно еще так:
-                     
-                     if let convertedHeaders = httpUrlRespose.allHeaderFields as? [String:Any] {
-                     print("Server's Headers are: \(convertedHeaders)")
-                     }
-                     
-                     // но мне в JSON приятнее)
-                     */
+                    catch let error {
+                        print(error.localizedDescription)
+                    }
                 }
                 if let unwrappedError = error as NSError? {
                     let code = unwrappedError.code
