@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let url = appConfiguration.rawValue
         NetworkService.startTask(requestUrl: url)
         
+        FirebaseApp.configure()
         return true
     }
 }

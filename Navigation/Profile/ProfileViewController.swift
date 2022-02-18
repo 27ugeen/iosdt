@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class ProfileViewController: UIViewController {
     
@@ -44,6 +45,16 @@ class ProfileViewController: UIViewController {
         
         setupTableView()
         setupConstraints()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        do {
+            try Auth.auth().signOut()
+            print("User from profile is signed out!")
+        }
+        catch let error as NSError {
+            print("Error sign out: \(error)")
+        }
     }
 }
 
