@@ -8,74 +8,72 @@
 import Foundation
 import UIKit
 import FirebaseAuth
+import FirebaseDatabase
 
-protocol LoginViewOutput {
-    func signInUser(userLogin: String, userPassword: String)
+enum AuthorizationStrategy {
+    case loggedIn
+    case newUser
 }
 
-final class LoginViewModel: LoginViewOutput {
-    
-    let loginVC: UIViewController = LogInViewController()
-    
-    func signInUser(userLogin: String, userPassword: String) {
-        
-        let authGroup = DispatchGroup()
+protocol LoginViewInputProtocol: AnyObject {
+    func userTryAuthorize(withStrategy: AuthorizationStrategy)
+}
 
-        var vc: ProfileViewController
-    #if DEBUG
-        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
-    #else
-        var status: Bool?
-        var errorCode: Int?
-        authGroup.enter()
+protocol LoginViewOutputProtocol: AnyObject {
+    func signInUser(userLogin: String, userPassword: String, completition: @escaping (Error?) -> Void)
+    func createUser(userLogin: String, userPassword: String, completition: @escaping (Error?) -> Void)
+    func logOutUser(completition: @escaping (Error?) -> Void)
+}
+
+final class LoginViewModel: LoginViewOutputProtocol {
+    
+    weak var view: LoginViewInputProtocol?
+    
+    var handle: AuthStateDidChangeListenerHandle?
+    
+    func createUser(userLogin: String, userPassword: String, completition: @escaping (Error?) -> Void) {
+        Auth.auth().createUser(withEmail: userLogin, password: userPassword) { authResult, error in
+            if let result = authResult {
+                print("Result: \(result)")
+                print("Create result: \(String(describing: result.user.email))")
+                let ref = Database.database(url: "https://ginnavigation-default-rtdb.europe-west1.firebasedatabase.app").reference().child("users")
+                ref.child(result.user.uid).updateChildValues(["name" : result.user.email!])
+            } else if let error = error as NSError? {
+                completition(error)
+                return
+            }
+        }
+    }
+    
+    func signInUser(userLogin: String, userPassword: String, completition: @escaping (Error?) -> Void) {
         Auth.auth().signIn(withEmail: userLogin, password: userPassword) { authResult, error in
-
             if let result = authResult {
                 print("Result: \(result)")
                 print("Sign in result: \(String(describing: result.user.email))")
-                status = true
             } else if let error = error as NSError? {
-                print("Error: \(error)")
-                errorCode = error.code
-                if errorCode != 17011 {
-                    status = false
-                } else {
-
-                    Auth.auth().createUser(withEmail: userLogin, password: userPassword) { authResult, error in
-                        if let result = authResult {
-                            print("Result: \(result)")
-                            print("Sign in result: \(String(describing: result.user.email))")
-                            status = true
-                        } else if let error = error as NSError? {
-                            print("Error: \(error.code)")
-                            errorCode = error.code
-                            status = false
-                        }
-                        if let status = status {
-                            print("Status: \(String(describing: status))")
-                            guard status else {
-                                print("Try again")
-                                return
-                            }
-                        }
-                    }
-                }
+                completition(error)
+                return
             }
-            if let status = status {
-                print("Status: \(String(describing: status))")
-                guard status else {
-                    print("Try again")
-                    return
-                }
-            }
-            authGroup.leave()
-        }
-
-        vc = ProfileViewController(userService: CurrentUserService(), userName: userLogin )
-    #endif
-        authGroup.notify(queue: DispatchQueue.main) { [self] in
-            self.loginVC.navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    func logOutUser(completition: @escaping (Error?) -> Void) {
+        do {
+            try Auth.auth().signOut()
+            completition(nil)
+        }
+        catch let error as NSError {
+            completition(error)
+        }
+    }
+    
+    func createListener(completition: @escaping (FirebaseAuth.Auth, FirebaseAuth.User?) -> Void) {
+        handle = Auth.auth().addStateDidChangeListener { auth, user in
+                completition(auth, user)
+        }
+    }
+    
+    func removeListener() {
+        Auth.auth().removeStateDidChangeListener(handle!)
+    }
 }
-

@@ -6,14 +6,24 @@
 //
 
 import UIKit
-import FirebaseAuth
 
-class LogInViewController: UIViewController {
+class LogInViewController: UIViewController, LoginViewInputProtocol {
     
-    var handle: AuthStateDidChangeListenerHandle?
-    lazy var loginViewModel = LoginViewModel()
+    let loginViewModel: LoginViewModel
     
-    var loginAction: (() -> Void)?
+    var currentStrategy: AuthorizationStrategy = .loggedIn
+    
+    var isSignUp: Bool = true {
+        willSet {
+            if newValue {
+                loginButton.setTitle("Log in", for: .normal)
+                switchLoginButton.setTitle("You don't have an account yet? Create", for: .normal)
+            } else {
+                loginButton.setTitle("Create new account", for: .normal)
+                switchLoginButton.setTitle("Do you already have an account? Sign In", for: .normal)
+            }
+        }
+    }
     
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
@@ -72,19 +82,26 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    lazy var loginButton = MagicButton(title: "Log In", titleColor: .white) {
+    lazy var loginButton = MagicButton(title: "Log in", titleColor: .white) {
         self.goToProfile()
     }
     
+    lazy var switchLoginButton = MagicButton(title: "You don't have an account yet? Create", titleColor: .systemBlue) {
+        self.isSignUp = !self.isSignUp
+    }
     
-    func goToProfile() {
-        self.loginViewModel.signInUser(userLogin: self.loginTextField.text ?? "", userPassword: self.passwordTextField.text ?? "")
+    init(loginViewModel: LoginViewModel) {
+        self.loginViewModel = loginViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        nil
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupAddTargetIsNotEmptyTextFields()
         setupLoginButton()
         setupViews()
     }
@@ -92,12 +109,16 @@ class LogInViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        handle = Auth.auth().addStateDidChangeListener { auth, user in
+        loginViewModel.createListener { auth, user in
             if user != nil {
+                let profileVC = ProfileViewController(userService: CurrentUserService(), userName: (auth.currentUser?.email)!, loginViewModel: self.loginViewModel)
+                if !profileVC.isViewLoaded {
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                }
                 print("User is signed in")
                 print("Current user: \(String(describing: user?.email))")
             } else {
-                print("No usre is signed in.")
+                print("No user is signed in.")
             }
         }
         
@@ -106,7 +127,7 @@ class LogInViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        Auth.auth().removeStateDidChangeListener(handle!)
+        loginViewModel.removeListener()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -115,27 +136,44 @@ class LogInViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-}
-
-extension LogInViewController {
-    private func setupAddTargetIsNotEmptyTextFields() {
-        loginButton.isEnabled = false
-        loginButton.setTitle("Please fill in all fields!", for: .disabled)
-        [loginTextField, passwordTextField].forEach({ $0.addTarget(self, action: #selector(textFieldIsNotEmpty), for: .editingChanged)})
+    
+    func showAlert(message: String) {
+        let alertVC = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        self.present(alertVC, animated: true, completion: nil)
     }
     
-    @objc func textFieldIsNotEmpty(sender: UITextField) {
-        
-        sender.text = sender.text?.trimmingCharacters(in: .whitespaces)
-        
-        guard
-            let login = loginTextField.text, !login.isEmpty,
-            let password = passwordTextField.text, !password.isEmpty
-        else {
-            loginButton.isEnabled = false
-            return
+    func goToProfile() {
+        if !isSignUp {
+            currentStrategy = .newUser
+        } else {
+            currentStrategy = .loggedIn
         }
-        loginButton.isEnabled = true
+        
+        if(!(loginTextField.text ?? "").isEmpty && !(passwordTextField.text ?? "").isEmpty) {
+            userTryAuthorize(withStrategy: currentStrategy)
+        } else {
+            showAlert(message: "Please fill in all fields!")
+        }
+    }
+    
+    func userTryAuthorize(withStrategy: AuthorizationStrategy) {
+        switch currentStrategy {
+        case .loggedIn:
+            loginViewModel.signInUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
+                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                }
+            }
+        case .newUser:
+            loginViewModel.createUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
+                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                }
+            }
+        }
     }
 }
 
@@ -150,6 +188,8 @@ extension LogInViewController {
         loginButton.setBackgroundImage(trasparentImage, for: .disabled)
         loginButton.layer.cornerRadius = 10
         loginButton.clipsToBounds = true
+        
+        switchLoginButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
     }
 }
 
@@ -164,6 +204,7 @@ extension LogInViewController {
         contentView.addSubview(loginTextField)
         contentView.addSubview(passwordTextField)
         contentView.addSubview(loginButton)
+        contentView.addSubview(switchLoginButton)
         
         let constraints = [
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -196,8 +237,13 @@ extension LogInViewController {
             loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            loginButton.heightAnchor.constraint(equalToConstant: 50)
+            loginButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            switchLoginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            switchLoginButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 5),
+            switchLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            switchLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            switchLoginButton.heightAnchor.constraint(equalToConstant: 20)
         ]
         NSLayoutConstraint.activate(constraints)
     }
