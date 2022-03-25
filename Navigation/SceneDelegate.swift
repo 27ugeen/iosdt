@@ -11,8 +11,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     
-    let loginInspector = MyLoginFactory().createChecker()
     let feedViewModel = FeedViewModel()
+    let loginViewModel = LoginViewModel()
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let feedVC = FeedViewController(viewModel: feedViewModel)
         
-        let loginVC = LogInViewController(delegate: loginInspector)
+        let loginVC = LogInViewController(loginViewModel: loginViewModel)
         loginVC.title = "Profile"
         
         let feedNavVC = UINavigationController(rootViewController: feedVC)

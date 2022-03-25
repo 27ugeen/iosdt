@@ -7,9 +7,23 @@
 
 import UIKit
 
-class LogInViewController: UIViewController {
+class LogInViewController: UIViewController, LoginViewInputProtocol {
     
-    var delegate: LoginViewControllerDelegate
+    let loginViewModel: LoginViewModel
+    
+    var currentStrategy: AuthorizationStrategy = .loggedIn
+    
+    var isSignUp: Bool = true {
+        willSet {
+            if newValue {
+                loginButton.setTitle("Log in", for: .normal)
+                switchLoginButton.setTitle("You don't have an account yet? Create", for: .normal)
+            } else {
+                loginButton.setTitle("Create new account", for: .normal)
+                switchLoginButton.setTitle("Do you already have an account? Sign In", for: .normal)
+            }
+        }
+    }
     
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
@@ -68,34 +82,21 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    lazy var loginButton = MagicButton(title: "Log In", titleColor: .white) {
+    lazy var loginButton = MagicButton(title: "Log in", titleColor: .white) {
         self.goToProfile()
     }
     
-    init(delegate: LoginViewControllerDelegate) {
-        self.delegate = delegate
+    lazy var switchLoginButton = MagicButton(title: "You don't have an account yet? Create", titleColor: .systemBlue) {
+        self.isSignUp = !self.isSignUp
+    }
+    
+    init(loginViewModel: LoginViewModel) {
+        self.loginViewModel = loginViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         nil
-    }
-    
-    func goToProfile() {
-        var vc: ProfileViewController
-    #if DEBUG
-        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
-    #else
-        let name = self.loginTextField.text ?? ""
-        let password = self.passwordTextField.text ?? ""
-        let status: Bool = (self.delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
-        guard status else {
-            print("Try again")
-            return
-        }
-        vc = ProfileViewController(userService: CurrentUserService(), userName: name )
-    #endif
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     override func viewDidLoad() {
@@ -108,8 +109,25 @@ class LogInViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        loginViewModel.createListener { auth, user in
+            if user != nil {
+                let profileVC = ProfileViewController(userService: CurrentUserService(), userName: (auth.currentUser?.email)!, loginViewModel: self.loginViewModel)
+                if !profileVC.isViewLoaded {
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                }
+                print("User is signed in")
+                print("Current user: \(String(describing: user?.email))")
+            } else {
+                print("No user is signed in.")
+            }
+        }
+        
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        loginViewModel.removeListener()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -117,6 +135,45 @@ class LogInViewController: UIViewController {
         
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    func showAlert(message: String) {
+        let alertVC = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        self.present(alertVC, animated: true, completion: nil)
+    }
+    
+    func goToProfile() {
+        if !isSignUp {
+            currentStrategy = .newUser
+        } else {
+            currentStrategy = .loggedIn
+        }
+        
+        if(!(loginTextField.text ?? "").isEmpty && !(passwordTextField.text ?? "").isEmpty) {
+            userTryAuthorize(withStrategy: currentStrategy)
+        } else {
+            showAlert(message: "Please fill in all fields!")
+        }
+    }
+    
+    func userTryAuthorize(withStrategy: AuthorizationStrategy) {
+        switch currentStrategy {
+        case .loggedIn:
+            loginViewModel.signInUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
+                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                }
+            }
+        case .newUser:
+            loginViewModel.createUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
+                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                }
+            }
+        }
     }
 }
 
@@ -131,6 +188,8 @@ extension LogInViewController {
         loginButton.setBackgroundImage(trasparentImage, for: .disabled)
         loginButton.layer.cornerRadius = 10
         loginButton.clipsToBounds = true
+        
+        switchLoginButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
     }
 }
 
@@ -145,6 +204,7 @@ extension LogInViewController {
         contentView.addSubview(loginTextField)
         contentView.addSubview(passwordTextField)
         contentView.addSubview(loginButton)
+        contentView.addSubview(switchLoginButton)
         
         let constraints = [
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -177,8 +237,13 @@ extension LogInViewController {
             loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            loginButton.heightAnchor.constraint(equalToConstant: 50)
+            loginButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            switchLoginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            switchLoginButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 5),
+            switchLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            switchLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            switchLoginButton.heightAnchor.constraint(equalToConstant: 20)
         ]
         NSLayoutConstraint.activate(constraints)
     }
@@ -197,36 +262,5 @@ private extension LogInViewController {
     func keyboardWillHide(notification: NSNotification) {
         scrollView.contentInset.bottom = .zero
         scrollView.verticalScrollIndicatorInsets = .zero
-    }
-}
-
-protocol LoginViewControllerDelegate: AnyObject {
-
-    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool
-}
-
-class LoginInspector: LoginViewControllerDelegate {
-    
-    private let loginUseCase: Checker
-    
-    init(useCase: Checker) {
-        self.loginUseCase = useCase
-    }
-    
-    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool {
-        return loginUseCase.checkLoginPassword(userLogin: enteredLogin, userPassword: enteredPassword)
-    }
-}
-
-/// *FACTORY*
-protocol LoginFactory {
-    func createChecker() -> LoginInspector
-}
-
-/// *FACTORY - IMPLEMENTATION*
-class MyLoginFactory: LoginFactory {
-  func createChecker() -> LoginInspector {
-      let loginInspector = LoginInspector(useCase: Checker.instance)
-        return loginInspector
     }
 }

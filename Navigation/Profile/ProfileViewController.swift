@@ -9,6 +9,8 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
+    let loginViewModel: LoginViewModel
+    
     let tableView = UITableView(frame: .zero, style: .grouped)
     
     let cellID = String(describing: PostTableViewCell.self)
@@ -18,12 +20,12 @@ class ProfileViewController: UIViewController {
     let userService: UserServiceProtocol
     var userLoginName: String
     
-    init(userService: UserServiceProtocol, userName: String) {
+    init(userService: UserServiceProtocol, userName: String, loginViewModel: LoginViewModel) {
         self.userService = userService
         self.userLoginName = userName
+        self.loginViewModel = loginViewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -37,13 +39,24 @@ class ProfileViewController: UIViewController {
         print("Current user \"\(testUser.userFullName)\" is logged in")
     #else
         let currentUser = CurrentUserService().showUserInfo(userName: userLoginName)
-        print("Current user \"\(currentUser.userFullName)\" is logged in")
+        print("Current user Profile \"\(currentUser.userFullName)\" is logged in")
     #endif
         
         view.backgroundColor = .white
         
         setupTableView()
         setupConstraints()
+    }
+    
+    func logOut() {
+        loginViewModel.logOutUser { error in
+            if error == nil {
+                self.navigationController?.popViewController(animated: true)
+                print("User is signed out!")
+            } else {
+                print("Error sign out: \(String(describing: error?.localizedDescription))")
+            }
+        }
     }
 }
 
@@ -72,7 +85,6 @@ extension ProfileViewController {
         NSLayoutConstraint.activate(constraints)
     }
 }
-
 
 extension ProfileViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -112,6 +124,7 @@ extension ProfileViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = ProfileHeaderView()
+        headerView.logOutAction = self.logOut
         return headerView
     }
 }
