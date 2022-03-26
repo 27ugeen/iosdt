@@ -7,14 +7,18 @@
 
 import UIKit
 
+enum userURLs: String {
+    case planets = "https://swapi.dev/api/planets/1"
+    case todos = "https://jsonplaceholder.typicode.com/todos/41"
+}
+
 class InfoViewController: UIViewController {
     
-    enum userURLs: String {
-        case planets = "https://swapi.dev/api/planets/1"
-        case todos = "https://jsonplaceholder.typicode.com/todos/41"
-    }
-    
     var planetInfoModel: PlanetInfoModel?
+    var residentsModel: ResidentsModel?
+    var residentsName: [String] = []
+    
+    let viewModel: InfoViewModel
     
     lazy var infoButtton = MagicButton(title: "dont touch me!!!", titleColor: .white) {
         self.buttonPressed()
@@ -43,28 +47,43 @@ class InfoViewController: UIViewController {
     
     let tableView = UITableView(frame: .zero, style: .grouped)
     
+    init(viewModel: InfoViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        nil
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        decodeModelFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
-            self.planetInfoModel = model
-            DispatchQueue.main.async {
-                self.orbitalPeriodLabel.text = "Orbital period is: " + model.orbitalPerion + " solar days"
-            }
-        }
-        
-        serializeValueFromData(costumURL: userURLs.todos.rawValue, value: "title") { value in
-            DispatchQueue.main.async {
-                self.infoLabel.text = value
-            }
-        }
         
         setupViews()
         setupTableView()
     }
     
-    override func viewDidLayoutSubviews() {
-        print("Residents: \(String(describing: planetInfoModel?.residents))")
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        viewModel.decodeModelFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
+            self.planetInfoModel = model
+            if let urls = self.planetInfoModel?.residents {
+                
+                for url in urls {
+                    self.viewModel.decodeModelFromData(costumURL: url, modelType: ResidentsModel.self) { model in
+                        self.residentsModel = model
+                        self.residentsName.append(model.name)
+                        self.tableView.reloadData()
+                    }
+                }
+            }
+            self.orbitalPeriodLabel.text = "Orbital period is: " + (self.planetInfoModel?.orbitalPerion ?? "0") + " solar days"
+        }
+        
+        viewModel.serializeValueFromData(costumURL: userURLs.todos.rawValue, value: "title") { value in
+            self.infoLabel.text = value
+        }
     }
     
     func buttonPressed() {
@@ -78,38 +97,6 @@ class InfoViewController: UIViewController {
         alertVC.addAction(actionOk)
         alertVC.addAction(actionCancel)
         self.present(alertVC, animated: true, completion: nil)
-    }
-    
-    func serializeValueFromData(costumURL: String, value: String, completition: @escaping (String) -> Void){
-        if let url = URL(string: costumURL) {
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                if let unwrappedData = data {
-                    do {
-                        let serializedData = try JSONSerialization.jsonObject(with: unwrappedData, options: [])
-                        if let dict = serializedData as? [String: Any],
-                           let title = dict[value] as? String {
-                            completition(title)
-                        }
-                    } catch let error { print(error) }
-                }
-            }
-            task.resume()
-        } else { print("Can't create URL") }
-    }
-    
-    func decodeModelFromData<T: Decodable>(costumURL: String, modelType: T.Type, completition: @escaping (T) -> Void) {
-        if let url = URL(string: costumURL) {
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                if let unwrappedData = data {
-                    do {
-                        let modelInfo = try JSONDecoder().decode(modelType, from: unwrappedData)
-                        completition(modelInfo)
-                    }
-                    catch let error { print("Error: \(error)") }
-                }
-            }
-            task.resume()
-        } else { print("Can't create URL") }
     }
 }
 
@@ -156,61 +143,13 @@ extension InfoViewController {
 
 extension InfoViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.planetInfoModel?.residents.count ?? 10
+        residentsName.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: InfoTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: InfoTableViewCell.self), for: indexPath) as! InfoTableViewCell
-
-        decodeModelFromData(costumURL: userURLs.planets.rawValue, modelType: PlanetInfoModel.self) { model in
-            self.planetInfoModel = model
-            if let urls = self.planetInfoModel?.residents {
-                self.decodeModelFromData(costumURL: urls[indexPath.row], modelType: ResidentsModel.self) { model in
-                    DispatchQueue.main.async {
-                        cell.label.text = model.name
-                    }
-                }
-            }
-        }
-        return cell
-    }
-}
-
-struct PlanetInfoModel: Codable {
-    let name: String
-    let orbitalPerion: String
-    let diameter: String
-    let population: String
-    var residents: [String]
-    
-    enum CodingKeys: String, CodingKey {
-        case name
-        case orbitalPerion = "orbital_period"
-        case diameter
-        case population
-        case residents
-    }
-    
-    init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
         
-        name = try values.decode(String.self, forKey: .name)
-        orbitalPerion = try values.decode(String.self, forKey: .orbitalPerion)
-        diameter = try values.decode(String.self, forKey: .diameter)
-        population = try values.decode(String.self, forKey: .population)
-        residents = try values.decode([String].self, forKey: .residents)
-    }
-}
-
-struct ResidentsModel: Codable {
-    var name: String
-    
-    enum CodingKeys: String, CodingKey {
-        case name
-    }
-    
-    init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        name = try values.decode(String.self, forKey: .name)
+        cell.label.text = residentsName[indexPath.row]
+        return cell
     }
 }
