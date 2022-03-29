@@ -9,38 +9,14 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
-    let loginViewModel: LoginViewModel
-    
     let tableView = UITableView(frame: .zero, style: .grouped)
     
     let cellID = String(describing: PostTableViewCell.self)
     let photoCellID = String(describing: PhotosTableViewCell.self)
     let headerID = String(describing: ProfileHeaderView.self)
     
-    let userService: UserServiceProtocol
-    var userLoginName: String
-    
-    init(userService: UserServiceProtocol, userName: String, loginViewModel: LoginViewModel) {
-        self.userService = userService
-        self.userLoginName = userName
-        self.loginViewModel = loginViewModel
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-    #if DEBUG
-        let testUser = TestUserService().showUserInfo(userName: userLoginName)
-        print("Current user \"\(testUser.userFullName)\" is logged in")
-    #else
-        let currentUser = CurrentUserService().showUserInfo(userName: userLoginName)
-        print("Current user Profile \"\(currentUser.userFullName)\" is logged in")
-    #endif
         
         view.backgroundColor = .white
         
@@ -49,14 +25,28 @@ class ProfileViewController: UIViewController {
     }
     
     func logOut() {
-        loginViewModel.logOutUser { error in
-            if error == nil {
-                self.navigationController?.popViewController(animated: true)
-                print("User is signed out!")
-            } else {
-                print("Error sign out: \(String(describing: error?.localizedDescription))")
-            }
+        UserDefaults.standard.set(false, forKey: "isSignedUp")
+        
+        let viewController = LogInViewController(loginViewModel: LoginViewModel().self)
+        let navCtrl = UINavigationController(rootViewController: viewController)
+
+        guard
+            let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first,
+            let rootViewController = window.rootViewController
+
+        else {
+            return
         }
+
+        navCtrl.view.frame = rootViewController.view.frame
+        navCtrl.isNavigationBarHidden = true
+        navCtrl.view.layoutIfNeeded()
+
+        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            window.rootViewController = navCtrl
+        })
+        
+        print("User is signed out!")
     }
 }
 
