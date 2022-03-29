@@ -11,9 +11,10 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     
     let loginViewModel: LoginViewModel
     
-    var currentStrategy: AuthorizationStrategy = .loggedIn
-    
-    var isSignUp: Bool = true {
+    var authError: String = ""
+    var currentStrategy: AuthorizationStrategy = .logIn
+    var isSignedUp: Bool = UserDefaults.standard.bool(forKey: "isSignedUp")
+    var isUserExists: Bool = true {
         willSet {
             if newValue {
                 loginButton.setTitle("Log in", for: .normal)
@@ -87,7 +88,7 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     }
     
     lazy var switchLoginButton = MagicButton(title: "You don't have an account yet? Create", titleColor: .systemBlue) {
-        self.isSignUp = !self.isSignUp
+        self.isUserExists = !self.isUserExists
     }
     
     init(loginViewModel: LoginViewModel) {
@@ -102,6 +103,7 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        checkUserSignUp()
         setupLoginButton()
         setupViews()
     }
@@ -109,25 +111,8 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        loginViewModel.createListener { auth, user in
-            if user != nil {
-                let profileVC = ProfileViewController(userService: CurrentUserService(), userName: (auth.currentUser?.email)!, loginViewModel: self.loginViewModel)
-                if !profileVC.isViewLoaded {
-                    self.navigationController?.pushViewController(profileVC, animated: true)
-                }
-                print("User is signed in")
-                print("Current user: \(String(describing: user?.email))")
-            } else {
-                print("No user is signed in.")
-            }
-        }
-        
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        loginViewModel.removeListener()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -143,11 +128,46 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
         self.present(alertVC, animated: true, completion: nil)
     }
     
+    func createTabBarController() -> UITabBarController {
+        let tabBC = UITabBarController()
+        
+        let feedVC = FeedViewController(viewModel: FeedViewModel().self)
+        let feedNavVC = UINavigationController(rootViewController: feedVC)
+        feedNavVC.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 0)
+        
+        let profileVC = ProfileViewController()
+        let profileNavVC = UINavigationController(rootViewController: profileVC)
+        profileNavVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 1)
+        profileNavVC.isNavigationBarHidden = true
+        
+        tabBC.viewControllers = [profileNavVC, feedNavVC]
+               
+        return tabBC
+    }
+    
+    func backToRootView() {
+        self.navigationController?.popToRootViewController(animated: true)
+    }
+    
+    func checkUserSignUp() {
+        if isSignedUp {
+            let userId = UserDefaults.standard.string(forKey: "userId")
+            if let currentId = userId {
+            let currentUser = loginViewModel.getCurrentUser(currentId)
+                let tabBC = createTabBarController()
+                self.navigationController?.pushViewController(tabBC, animated: true)
+                print("Current user: \(String(describing: currentUser.email)) is signed in")
+            }
+        } else {
+            print("No user is signed in.")
+        }
+    }
+    
     func goToProfile() {
-        if !isSignUp {
+        if !isUserExists {
             currentStrategy = .newUser
         } else {
-            currentStrategy = .loggedIn
+            currentStrategy = .logIn
         }
         
         if(!(loginTextField.text ?? "").isEmpty && !(passwordTextField.text ?? "").isEmpty) {
@@ -159,21 +179,29 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     
     func userTryAuthorize(withStrategy: AuthorizationStrategy) {
         switch currentStrategy {
-        case .loggedIn:
+        case .logIn:
             loginViewModel.signInUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
                 if let unwrappedError = error {
-                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
-                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                    self.authError = unwrappedError
+                    print("Error: \(unwrappedError)")
+                    self.showAlert(message: unwrappedError)
                 }
             }
         case .newUser:
             loginViewModel.createUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
                 if let unwrappedError = error {
-                    print("error is: \(String(describing: unwrappedError.localizedDescription))")
-                    self.showAlert(message: String(describing: unwrappedError.localizedDescription))
+                    self.authError = unwrappedError
+                    print("Error: \(unwrappedError)")
+                    self.showAlert(message: unwrappedError)
                 }
             }
         }
+        if authError == "" {
+            let tabBC = createTabBarController()
+            self.navigationController?.pushViewController(tabBC, animated: true)
+            print("Current user: \(String(describing: self.loginTextField.text)) is signed in")
+        }
+        authError = ""
     }
 }
 
