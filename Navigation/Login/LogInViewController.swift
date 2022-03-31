@@ -41,8 +41,10 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
     let logoImage: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(named: "logo")
+        image.image = UIImage(named: "trident")
         image.backgroundColor = .white
+        image.layer.masksToBounds = true
+        image.layer.cornerRadius = 10
         return image
     }()
     
@@ -140,7 +142,11 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
         profileNavVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 1)
         profileNavVC.isNavigationBarHidden = true
         
-        tabBC.viewControllers = [profileNavVC, feedNavVC]
+        let favoriteVC = FavoriteViewController()
+        let favoriteNavVC = UINavigationController(rootViewController: favoriteVC)
+        favoriteNavVC.tabBarItem = UITabBarItem(title: "Favorite", image: UIImage(systemName: "star.square.fill"), tag: 2)
+        
+        tabBC.viewControllers = [profileNavVC, feedNavVC, favoriteNavVC]
                
         return tabBC
     }
@@ -249,11 +255,11 @@ extension LogInViewController {
             
             logoImage.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             logoImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 120),
-            logoImage.widthAnchor.constraint(equalToConstant: 100),
+            logoImage.widthAnchor.constraint(equalToConstant: 150),
             logoImage.heightAnchor.constraint(equalTo: logoImage.widthAnchor),
             
             loginTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            loginTextField.topAnchor.constraint(equalTo: logoImage.bottomAnchor, constant: 120),
+            loginTextField.topAnchor.constraint(equalTo: logoImage.bottomAnchor, constant: 100),
             loginTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             loginTextField.heightAnchor.constraint(equalToConstant: 50),
             
