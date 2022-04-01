@@ -11,6 +11,18 @@ import CoreData
 class DataBaseManager {
     
     static let shared = DataBaseManager()
+    //==================Container========================
+//    private let persistentContainer: NSPersistentContainer
+//
+//    init() {
+//    let container = NSPersistentContainer(name: "DataBaseModel")
+//    container.loadPersistentStores { description, error in
+//       if let error = error {
+//           fatalError("Unable to load persistent stores: \(error)")
+//       }
+//    }
+//    self.persistentContainer = container
+//    }
     //==================Object Model========================
     private lazy var managedObjectModel: NSManagedObjectModel = {
         guard let modelURL = Bundle.main.url(forResource: "DataBaseModel", withExtension: "momd") else {
