@@ -45,18 +45,44 @@ class DataBaseManager {
         return managedObjectContext
     }()
     
-    func getFavoritePost() -> FavoritePost? {
+    func getAllPosts() -> [FavoritePost?] {
         let fetchRequest = FavoritePost.fetchRequest()
+        var favoritePostsArray: [FavoritePost]?
+        
         do {
-            let settings = try managedObjectContext.fetch(fetchRequest)
-            if let set = settings.last {
-                return set
-            } else {
-                return nil
-            }
+            favoritePostsArray = try managedObjectContext.fetch(fetchRequest)
         } catch let error {
             print(error)
         }
-        return nil
+        
+        return favoritePostsArray ?? []
+    }
+    
+    func addPost(_ post: Post, completition: @escaping (String?) -> Void) {
+        let fetchRequest = FavoritePost.fetchRequest()
+        do {
+            let settings = try managedObjectContext.fetch(fetchRequest)
+            
+            if settings.contains(where:  { $0.title == post.title }) {
+                completition("This post has already been added!")
+            } else {
+                if let newSet = NSEntityDescription.insertNewObject(forEntityName: "FavoritePost", into: managedObjectContext) as? FavoritePost {
+                    newSet.title = post.title
+                    newSet.author = post.author
+                    newSet.image = post.image.jpegData(compressionQuality: .zero)
+                    newSet.postDescription = post.description
+                    newSet.likes = Int64(post.likes)
+                    newSet.views = Int64(post.views)
+                    
+                    print("Post has been added!")
+                } else {
+                    fatalError("Unable to insert FavoritePost entity")
+                }
+            }
+                
+            try managedObjectContext.save()
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
     }
 }

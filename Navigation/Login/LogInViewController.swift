@@ -124,12 +124,6 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    func showAlert(message: String) {
-        let alertVC = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alertVC.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        self.present(alertVC, animated: true, completion: nil)
-    }
-    
     func createTabBarController() -> UITabBarController {
         let tabBC = UITabBarController()
         
@@ -137,22 +131,18 @@ class LogInViewController: UIViewController, LoginViewInputProtocol {
         let feedNavVC = UINavigationController(rootViewController: feedVC)
         feedNavVC.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 0)
         
-        let profileVC = ProfileViewController()
+        let profileVC = ProfileViewController(profileViewModel: ProfileViewModel().self)
         let profileNavVC = UINavigationController(rootViewController: profileVC)
         profileNavVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 1)
         profileNavVC.isNavigationBarHidden = true
         
-        let favoriteVC = FavoriteViewController()
+        let favoriteVC = FavoriteViewController(favoriteViewModel: FavoriteViewModel().self)
         let favoriteNavVC = UINavigationController(rootViewController: favoriteVC)
         favoriteNavVC.tabBarItem = UITabBarItem(title: "Favorite", image: UIImage(systemName: "star.square.fill"), tag: 2)
         
         tabBC.viewControllers = [profileNavVC, feedNavVC, favoriteNavVC]
                
         return tabBC
-    }
-    
-    func backToRootView() {
-        self.navigationController?.popToRootViewController(animated: true)
     }
     
     func checkUserSignUp() {

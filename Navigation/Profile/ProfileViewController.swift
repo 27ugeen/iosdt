@@ -9,16 +9,31 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
+    let profileViewModel: ProfileViewModel
+    
     let tableView = UITableView(frame: .zero, style: .grouped)
     
     let cellID = String(describing: PostTableViewCell.self)
     let photoCellID = String(describing: PhotosTableViewCell.self)
     let headerID = String(describing: ProfileHeaderView.self)
     
+    init(profileViewModel: ProfileViewModel) {
+        self.profileViewModel = profileViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapEdit(_:)))
+        tapGesture.numberOfTapsRequired = 2
+        tableView.addGestureRecognizer(tapGesture)
         
         setupTableView()
         setupConstraints()
@@ -47,6 +62,24 @@ class ProfileViewController: UIViewController {
         })
         
         print("User is signed out!")
+    }
+    
+    @objc func tapEdit(_ recognizer: UITapGestureRecognizer)  {
+        if recognizer.state == UIGestureRecognizer.State.ended {
+            let tapLocation = recognizer.location(in: self.tableView)
+            if let tapIndexPath = self.tableView.indexPathForRow(at: tapLocation) {
+                if let tappedCell = self.tableView.cellForRow(at: tapIndexPath) as? PostTableViewCell {
+                    if tapIndexPath.row == 0 {
+                        return
+                    } else {
+                        tappedCell.post = PostsStorage.tableModel[tapIndexPath.section].posts[tapIndexPath.row - 1]
+                        profileViewModel.addToFavoritePosts(tappedCell.post!) { message in
+                            self.showAlert(message: message ?? "")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

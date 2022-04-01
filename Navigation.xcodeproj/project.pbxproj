@@ -43,6 +43,9 @@
 		11EC8B1227F4DAFD0001B6FD /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1127F4DAFD0001B6FD /* FavoriteViewController.swift */; };
 		11EC8B1627F585ED0001B6FD /* DataBaseModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1427F585EC0001B6FD /* DataBaseModel.xcdatamodeld */; };
 		11EC8B1B27F58BAF0001B6FD /* DataBaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1A27F58BAF0001B6FD /* DataBaseManager.swift */; };
+		11EC8B1D27F634250001B6FD /* FavoriteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */; };
+		11EC8B1F27F708200001B6FD /* FavoritePostTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */; };
+		11EC8B2127F7392C0001B6FD /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B2027F7392C0001B6FD /* ProfileViewModel.swift */; };
 		11FD6E8827497E9A002D92F5 /* MagicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FD6E8727497E9A002D92F5 /* MagicButton.swift */; };
 		BEED2259CA58CA32809294BD /* Pods_Navigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8763F3D38D66626839728B7 /* Pods_Navigation.framework */; };
 /* End PBXBuildFile section */
@@ -81,6 +84,9 @@
 		11EC8B1127F4DAFD0001B6FD /* FavoriteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
 		11EC8B1527F585ED0001B6FD /* DataBaseModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataBaseModel.xcdatamodel; sourceTree = "<group>"; };
 		11EC8B1A27F58BAF0001B6FD /* DataBaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBaseManager.swift; sourceTree = "<group>"; };
+		11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewModel.swift; sourceTree = "<group>"; };
+		11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritePostTableViewCell.swift; sourceTree = "<group>"; };
+		11EC8B2027F7392C0001B6FD /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		11FD6E8727497E9A002D92F5 /* MagicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicButton.swift; sourceTree = "<group>"; };
 		856AA217C2E54C5A1BE62752 /* Pods-Navigation.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation.debug.xcconfig"; path = "Target Support Files/Pods-Navigation/Pods-Navigation.debug.xcconfig"; sourceTree = "<group>"; };
 		A80F44DB7F757A04F9D16D4C /* Pods-Navigation.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation.release.xcconfig"; path = "Target Support Files/Pods-Navigation/Pods-Navigation.release.xcconfig"; sourceTree = "<group>"; };
@@ -162,6 +168,7 @@
 			children = (
 				112A124526AD9750005F46A6 /* ProfileHeaderView.swift */,
 				112A123226A758FD005F46A6 /* ProfileViewController.swift */,
+				11EC8B2027F7392C0001B6FD /* ProfileViewModel.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -221,6 +228,8 @@
 			isa = PBXGroup;
 			children = (
 				11EC8B1127F4DAFD0001B6FD /* FavoriteViewController.swift */,
+				11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */,
+				11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -399,10 +408,13 @@
 				1151E50D278877ED00DA0BB3 /* FeedViewModel.swift in Sources */,
 				11097B5D272604F800219C85 /* Utils.swift in Sources */,
 				11EC8B1B27F58BAF0001B6FD /* DataBaseManager.swift in Sources */,
+				11EC8B2127F7392C0001B6FD /* ProfileViewModel.swift in Sources */,
 				112A123326A758FD005F46A6 /* ProfileViewController.swift in Sources */,
 				11BF0A2F27EF038F0036DE6D /* InfoViewModel.swift in Sources */,
+				11EC8B1F27F708200001B6FD /* FavoritePostTableViewCell.swift in Sources */,
 				1121494727B0324900BCF0A7 /* NetworkService.swift in Sources */,
 				11EC8B1627F585ED0001B6FD /* DataBaseModel.xcdatamodeld in Sources */,
+				11EC8B1D27F634250001B6FD /* FavoriteViewModel.swift in Sources */,
 				112A123126A758E3005F46A6 /* FeedViewController.swift in Sources */,
 				11BF0A3B27F0A0500036DE6D /* DataProvider.swift in Sources */,
 				112A123726A7666C005F46A6 /* Post.swift in Sources */,
