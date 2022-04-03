@@ -37,4 +37,9 @@ class FavoriteViewModel: FavoriteViewModelOutputProtocol {
             }
         }
     }
+    
+    func removePostFromFavorite(post: FavoritePostStub, index: Int) {
+        DataBaseManager.shared.deletePost(favPost: post)
+        favoritePosts.remove(at: index)
+    }
 }

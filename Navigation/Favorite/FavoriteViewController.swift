@@ -46,6 +46,7 @@ extension FavoriteViewController {
         tableView.register(FavoritePostTableViewCell.self, forCellReuseIdentifier: favoritePostCellID)
         
         tableView.dataSource = self
+        tableView.delegate = self
     }
 }
 
@@ -80,5 +81,21 @@ extension FavoriteViewController: UITableViewDataSource  {
         cell.postViewsLabel.text = "Views: \(favoriteViewModel.favoritePosts[indexPath.row].views)"
         
         return cell
+    }
+}
+
+extension FavoriteViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let post = favoriteViewModel.favoritePosts[indexPath.row]
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, complete in
+            self.favoriteViewModel.removePostFromFavorite(post: post, index: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            complete(true)
+        }
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        configuration.performsFirstActionWithFullSwipe = true
+        return configuration
     }
 }
