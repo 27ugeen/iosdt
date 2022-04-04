@@ -24,6 +24,7 @@ struct FavoritePostStub {
 class FavoriteViewModel: FavoriteViewModelOutputProtocol {
     
     var favoritePosts: [FavoritePostStub] = []
+    var filteredPosts: [FavoritePostStub] = []
     
     func getAllFavoritePosts() {
         let postsArray = DataBaseManager.shared.getAllPosts()
@@ -41,5 +42,23 @@ class FavoriteViewModel: FavoriteViewModelOutputProtocol {
     func removePostFromFavorite(post: FavoritePostStub, index: Int) {
         DataBaseManager.shared.deletePost(favPost: post)
         favoritePosts.remove(at: index)
+    }
+    
+    func getFilteredPosts(postAuthor: String) {
+        
+        self.getAllFavoritePosts()
+        
+        filteredPosts = []
+        favoritePosts.forEach {
+            if $0.author == postAuthor {
+                filteredPosts.append($0)
+            }
+        }
+        if filteredPosts.count > 0 {
+            favoritePosts = filteredPosts
+        } else {
+            favoritePosts = []
+            print("No such author found")
+        }
     }
 }
