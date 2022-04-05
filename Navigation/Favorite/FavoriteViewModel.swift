@@ -10,6 +10,7 @@ import UIKit
 
 protocol FavoriteViewModelOutputProtocol {
     func getAllFavoritePosts()
+    func getFilteredPosts(postAuthor: String)
 }
 
 struct FavoritePostStub {
@@ -24,6 +25,7 @@ struct FavoritePostStub {
 class FavoriteViewModel: FavoriteViewModelOutputProtocol {
     
     var favoritePosts: [FavoritePostStub] = []
+    var filteredPosts: [FavoritePostStub] = []
     
     func getAllFavoritePosts() {
         let postsArray = DataBaseManager.shared.getAllPosts()
@@ -31,10 +33,41 @@ class FavoriteViewModel: FavoriteViewModelOutputProtocol {
         favoritePosts = []
         for post in postsArray {
             if let unwrappedPost = post {
-                let newPost = FavoritePostStub(title: unwrappedPost.title ?? "", author: unwrappedPost.author ?? "", image: UIImage(data: unwrappedPost.image ?? Data()) ?? UIImage(), description: unwrappedPost.postDescription ?? "", likes: Int(unwrappedPost.likes), views: Int(unwrappedPost.views))
+                
+                let newPostImage = DataBaseManager.shared.getImageFromDocuments(imageUrl: URL(string: unwrappedPost.stringImage ?? "") ?? URL(fileURLWithPath: ""))
+                
+                let newPost = FavoritePostStub(title: unwrappedPost.title ?? "",
+                                               author: unwrappedPost.author ?? "",
+                                               image: newPostImage ?? UIImage(),
+                                               description: unwrappedPost.postDescription ?? "",
+                                               likes: Int(unwrappedPost.likes),
+                                               views: Int(unwrappedPost.views))
                 
                 favoritePosts.append(newPost)
             }
+        }
+    }
+    
+    func removePostFromFavorite(post: FavoritePostStub, index: Int) {
+        DataBaseManager.shared.deletePost(favPost: post)
+        favoritePosts.remove(at: index)
+    }
+    
+    func getFilteredPosts(postAuthor: String) {
+        
+        self.getAllFavoritePosts()
+        
+        filteredPosts = []
+        favoritePosts.forEach {
+            if $0.author == postAuthor {
+                filteredPosts.append($0)
+            }
+        }
+        if filteredPosts.count > 0 {
+            favoritePosts = filteredPosts
+        } else {
+            favoritePosts = []
+            print("No such author found")
         }
     }
 }

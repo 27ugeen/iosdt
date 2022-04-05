@@ -46,6 +46,8 @@
 		11EC8B1D27F634250001B6FD /* FavoriteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */; };
 		11EC8B1F27F708200001B6FD /* FavoritePostTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */; };
 		11EC8B2127F7392C0001B6FD /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B2027F7392C0001B6FD /* ProfileViewModel.swift */; };
+		11EC8B2327FADC430001B6FD /* FavoriteSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B2227FADC420001B6FD /* FavoriteSearchViewController.swift */; };
+		11EC8B2527FB397E0001B6FD /* FavoriteSearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC8B2427FB397D0001B6FD /* FavoriteSearchHeaderView.swift */; };
 		11FD6E8827497E9A002D92F5 /* MagicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FD6E8727497E9A002D92F5 /* MagicButton.swift */; };
 		BEED2259CA58CA32809294BD /* Pods_Navigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8763F3D38D66626839728B7 /* Pods_Navigation.framework */; };
 /* End PBXBuildFile section */
@@ -87,6 +89,8 @@
 		11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewModel.swift; sourceTree = "<group>"; };
 		11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritePostTableViewCell.swift; sourceTree = "<group>"; };
 		11EC8B2027F7392C0001B6FD /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		11EC8B2227FADC420001B6FD /* FavoriteSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteSearchViewController.swift; sourceTree = "<group>"; };
+		11EC8B2427FB397D0001B6FD /* FavoriteSearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteSearchHeaderView.swift; sourceTree = "<group>"; };
 		11FD6E8727497E9A002D92F5 /* MagicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicButton.swift; sourceTree = "<group>"; };
 		856AA217C2E54C5A1BE62752 /* Pods-Navigation.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation.debug.xcconfig"; path = "Target Support Files/Pods-Navigation/Pods-Navigation.debug.xcconfig"; sourceTree = "<group>"; };
 		A80F44DB7F757A04F9D16D4C /* Pods-Navigation.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation.release.xcconfig"; path = "Target Support Files/Pods-Navigation/Pods-Navigation.release.xcconfig"; sourceTree = "<group>"; };
@@ -228,8 +232,10 @@
 			isa = PBXGroup;
 			children = (
 				11EC8B1127F4DAFD0001B6FD /* FavoriteViewController.swift */,
+				11EC8B2227FADC420001B6FD /* FavoriteSearchViewController.swift */,
 				11EC8B1C27F634250001B6FD /* FavoriteViewModel.swift */,
 				11EC8B1E27F708200001B6FD /* FavoritePostTableViewCell.swift */,
+				11EC8B2427FB397D0001B6FD /* FavoriteSearchHeaderView.swift */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -417,6 +423,7 @@
 				11EC8B1D27F634250001B6FD /* FavoriteViewModel.swift in Sources */,
 				112A123126A758E3005F46A6 /* FeedViewController.swift in Sources */,
 				11BF0A3B27F0A0500036DE6D /* DataProvider.swift in Sources */,
+				11EC8B2527FB397E0001B6FD /* FavoriteSearchHeaderView.swift in Sources */,
 				112A123726A7666C005F46A6 /* Post.swift in Sources */,
 				112A123926A76A48005F46A6 /* InfoViewController.swift in Sources */,
 				11318A4726C7B7A5002AAE20 /* PhotosCollectionViewCell.swift in Sources */,
@@ -426,6 +433,7 @@
 				117233EB27B7E5C000C6E835 /* InfoTableViewCell.swift in Sources */,
 				113AE87F26B5E3B60037E715 /* LogInViewController.swift in Sources */,
 				112A120D26A6156D005F46A6 /* SceneDelegate.swift in Sources */,
+				11EC8B2327FADC430001B6FD /* FavoriteSearchViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

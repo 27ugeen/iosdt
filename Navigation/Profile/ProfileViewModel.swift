@@ -17,7 +17,9 @@ class ProfileViewModel {
     
     func addToFavoritePosts(_ post: Post, completition: @escaping (String?) -> Void) {
         DataBaseManager.shared.addPost(post) { message in
-            completition(message)
+            DispatchQueue.main.async {
+                completition(message)
+            }
         }
     }
 }

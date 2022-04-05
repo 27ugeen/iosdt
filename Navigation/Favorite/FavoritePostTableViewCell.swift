@@ -9,12 +9,21 @@ import UIKit
 
 class FavoritePostTableViewCell: UITableViewCell {
     
+    var postAuthorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .systemGray
+        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
+        label.numberOfLines = 0
+        return label
+    }()
+    
     var postTitleLabel: UILabel = {
         let title = UILabel()
         title.translatesAutoresizingMaskIntoConstraints = false
         title.textColor = .black
         title.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        title.numberOfLines = 2
+        title.numberOfLines = 3
         return title
     }()
     
@@ -60,10 +69,11 @@ class FavoritePostTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
+// MARK: - setup views
 extension FavoritePostTableViewCell {
     
     private func setupViews() {
+        contentView.addSubview(postAuthorLabel)
         contentView.addSubview(postTitleLabel)
         contentView.addSubview(postImageView)
         contentView.addSubview(postDescriptionLabel)
@@ -71,8 +81,12 @@ extension FavoritePostTableViewCell {
         contentView.addSubview(postViewsLabel)
         
         let constraints = [
+            postAuthorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 16),
+            postAuthorLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            postAuthorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
             postTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 16),
-            postTitleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            postTitleLabel.topAnchor.constraint(equalTo: postAuthorLabel.bottomAnchor, constant: 5),
             postTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
             postImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
