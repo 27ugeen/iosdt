@@ -30,6 +30,7 @@ class FavoriteViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        UserDefaults.standard.set("", forKey: "author")
         
         self.navigationItem.setRightBarButtonItems([searchBarButton, resetBarButton], animated: true)
         

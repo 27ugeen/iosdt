@@ -37,6 +37,7 @@ class FavoriteSearchViewController: UIViewController {
         text.placeholder = " Search by author"
         text.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: text.frame.height))
         text.leftViewMode = .always
+        text.becomeFirstResponder()
         return text
     }()
     
@@ -45,6 +46,10 @@ class FavoriteSearchViewController: UIViewController {
     }
     
     lazy var searchButton = MagicButton(title: "Search", titleColor: .systemGray) {
+        guard self.searchTextField.text != "" else {
+            self.showAlert(message: "Enter author")
+            return
+        }
         self.filterAction?(self.searchTextField.text ?? "")
         self.dismiss(animated: true)
     }

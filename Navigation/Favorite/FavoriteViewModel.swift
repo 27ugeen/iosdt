@@ -10,6 +10,7 @@ import UIKit
 
 protocol FavoriteViewModelOutputProtocol {
     func getAllFavoritePosts()
+    func getFilteredPosts(postAuthor: String)
 }
 
 struct FavoritePostStub {
@@ -32,7 +33,15 @@ class FavoriteViewModel: FavoriteViewModelOutputProtocol {
         favoritePosts = []
         for post in postsArray {
             if let unwrappedPost = post {
-                let newPost = FavoritePostStub(title: unwrappedPost.title ?? "", author: unwrappedPost.author ?? "", image: UIImage(data: unwrappedPost.image ?? Data()) ?? UIImage(), description: unwrappedPost.postDescription ?? "", likes: Int(unwrappedPost.likes), views: Int(unwrappedPost.views))
+                
+                let newPostImage = DataBaseManager.shared.getImageFromDocuments(imageUrl: URL(string: unwrappedPost.stringImage ?? "") ?? URL(fileURLWithPath: ""))
+                
+                let newPost = FavoritePostStub(title: unwrappedPost.title ?? "",
+                                               author: unwrappedPost.author ?? "",
+                                               image: newPostImage ?? UIImage(),
+                                               description: unwrappedPost.postDescription ?? "",
+                                               likes: Int(unwrappedPost.likes),
+                                               views: Int(unwrappedPost.views))
                 
                 favoritePosts.append(newPost)
             }
