@@ -13,7 +13,7 @@ class DataBaseManager {
     
     static let shared = DataBaseManager()
     //==================Container========================
-    private let persistentContainer: NSPersistentContainer
+    let persistentContainer: NSPersistentContainer
     private lazy var backgroundContext = persistentContainer.newBackgroundContext()
     
     init() {
@@ -70,7 +70,7 @@ class DataBaseManager {
         }
     }
     
-    func deletePost(favPost: FavoritePostStub) {
+    func deletePost(favPost: FavoritePost) {
         let fetchRequest = FavoritePost.fetchRequest()
         
         do {

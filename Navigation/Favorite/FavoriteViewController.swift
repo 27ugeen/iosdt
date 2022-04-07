@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 class FavoriteViewController: UIViewController {
     
@@ -15,9 +16,19 @@ class FavoriteViewController: UIViewController {
     let favoriteSearchHeaderID = String(describing: FavoriteSearchHeaderView.self)
     let tableView = UITableView(frame: .zero, style: .plain)
     
-    lazy var searchBarButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searcAction))
+    lazy var fetchResultsController: NSFetchedResultsController<FavoritePost> = {
+        let fetchRequest: NSFetchRequest<FavoritePost> = FavoritePost.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        let frc = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: DataBaseManager.shared.persistentContainer.viewContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        frc.delegate = self
+        return frc
+    }()
     
-    lazy var resetBarButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(clearFilter))
     
     init(favoriteViewModel: FavoriteViewModel) {
         self.favoriteViewModel = favoriteViewModel
@@ -30,10 +41,7 @@ class FavoriteViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        UserDefaults.standard.set("", forKey: "author")
-        
-        self.navigationItem.setRightBarButtonItems([searchBarButton, resetBarButton], animated: true)
-        
+
         setupTableView()
         setupViews()
     }
@@ -41,42 +49,14 @@ class FavoriteViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        let author = UserDefaults.standard.string(forKey: "author")
-        
-        if let unwrappedAuthor = author {
-            guard unwrappedAuthor == "" else {
-                self.getFilteredPosts(filteredAuthor: unwrappedAuthor)
-                return
+        DataBaseManager.shared.persistentContainer.viewContext.perform {
+            do {
+                try self.fetchResultsController.performFetch()
+                self.tableView.reloadData()
+            } catch let error as NSError {
+                print(error.localizedDescription)
             }
-            favoriteViewModel.getAllFavoritePosts()
-            tableView.reloadData()
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        if favoriteViewModel.favoritePosts.isEmpty {
-            self.showAlert(message: "Posts not found!")
-        }
-    }
-    
-    func getFilteredPosts(filteredAuthor: String) {
-        UserDefaults.standard.set(filteredAuthor, forKey: "author")
-        favoriteViewModel.getFilteredPosts(postAuthor: filteredAuthor)
-        tableView.reloadData()
-    }
-    
-    @objc func searcAction() {
-        let searhcVC = FavoriteSearchViewController()
-        searhcVC.filterAction = self.getFilteredPosts
-        self.present(searhcVC, animated: true)
-    }
-    
-    @objc func clearFilter() {
-        UserDefaults.standard.set("", forKey: "author")
-        favoriteViewModel.getAllFavoritePosts()
-        tableView.reloadData()
     }
 }
 // MARK: - setup table view
@@ -111,20 +91,54 @@ extension FavoriteViewController {
 // MARK: - UITableViewDataSource
 extension FavoriteViewController: UITableViewDataSource  {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return favoriteViewModel.favoritePosts.count
+        return fetchResultsController.fetchedObjects?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: favoritePostCellID, for: indexPath) as! FavoritePostTableViewCell
-        cell.postAuthorLabel.text = "Author: \(favoriteViewModel.favoritePosts[indexPath.row].author)"
-        cell.postTitleLabel.text = favoriteViewModel.favoritePosts[indexPath.row].title
-        cell.postImageView.image = favoriteViewModel.favoritePosts[indexPath.row].image
-        cell.postDescriptionLabel.text = favoriteViewModel.favoritePosts[indexPath.row].description
-        cell.postlikesLabel.text = "Likes: \(favoriteViewModel.favoritePosts[indexPath.row].likes)"
-        cell.postViewsLabel.text = "Views: \(favoriteViewModel.favoritePosts[indexPath.row].views)"
-        return cell
         
+        let post = fetchResultsController.object(at: indexPath)
+        cell.postAuthorLabel.text = "Author: \(post.author ?? "")"
+        cell.postTitleLabel.text = post.title
+        cell.postImageView.image = DataBaseManager.shared.getImageFromDocuments(imageUrl: URL(string: post.stringImage ?? "") ?? URL(fileURLWithPath: ""))
+        cell.postDescriptionLabel.text = post.postDescription
+        cell.postlikesLabel.text = "Likes: \(post.likes)"
+        cell.postViewsLabel.text = "Views: \(post.views)"
+        
+        return cell
+    }
+}
+// MARK: - NSFetchedResultsControllerDelegate
+extension FavoriteViewController: NSFetchedResultsControllerDelegate {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.beginUpdates()
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .delete:
+            guard let indexPath = indexPath else { fallthrough }
+            
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        case .insert:
+            guard let newIndexPath = newIndexPath else { fallthrough }
+            
+            tableView.insertRows(at: [newIndexPath], with: .automatic)
+        case .move:
+            guard let indexPath = indexPath, let newIndexPath = newIndexPath else { fallthrough }
+            
+            tableView.moveRow(at: indexPath, to: newIndexPath)
+        case .update:
+            guard let indexPath = indexPath else { fallthrough }
+            
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        @unknown default:
+            fatalError()
+        }
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.endUpdates()
     }
 }
 // MARK: - UITableViewDelegate
@@ -147,11 +161,10 @@ extension FavoriteViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let post = favoriteViewModel.favoritePosts[indexPath.row]
+        let post = fetchResultsController.object(at: indexPath)
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, complete in
-            self.favoriteViewModel.removePostFromFavorite(post: post, index: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
+            self.favoriteViewModel.removePostFromFavorite(post: post)
             complete(true)
         }
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
