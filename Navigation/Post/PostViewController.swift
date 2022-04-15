@@ -21,7 +21,7 @@ class PostViewController: UIViewController {
     }
     
     @objc func postTapped() {
-        let vc = InfoViewController()
+        let vc = InfoViewController(viewModel: InfoViewModel().self)
         self.present(vc, animated: true, completion: nil)
     }
     

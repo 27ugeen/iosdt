@@ -1,24 +1,13 @@
 //
-//  PostTableViewCell.swift
+//  FavoritePostTableViewCell.swift
 //  Navigation
 //
-//  Created by GiN Eugene on 04.08.2021.
+//  Created by GiN Eugene on 1/4/2022.
 //
 
 import UIKit
 
-class PostTableViewCell: UITableViewCell {
-    
-    var post: Post? {
-        didSet {
-            postAuthorLabel.text = "Author: \(String(describing: (post?.author ?? "unknown")))"
-            postTitleLabel.text = post?.title
-            postImageView.image = post?.image
-            postDescriptionLabel.text = post?.description
-            postlikesLabel.text = "Likes: \(String(describing: (post?.likes ?? 0)))"
-            postViewsLabel.text = "Views: \(String(describing: (post?.views ?? 0)))"
-        }
-    }
+class FavoritePostTableViewCell: UITableViewCell {
     
     var postAuthorLabel: UILabel = {
         let label = UILabel()
@@ -80,8 +69,8 @@ class PostTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-extension PostTableViewCell {
+// MARK: - setup views
+extension FavoritePostTableViewCell {
     
     private func setupViews() {
         contentView.addSubview(postAuthorLabel)
@@ -118,7 +107,6 @@ extension PostTableViewCell {
             postViewsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             postViewsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ]
-        
         NSLayoutConstraint.activate(constraints)
     }
 }

@@ -7,9 +7,24 @@
 
 import UIKit
 
-class LogInViewController: UIViewController {
+class LogInViewController: UIViewController, LoginViewInputProtocol {
     
-    var delegate: LoginViewControllerDelegate
+    let loginViewModel: LoginViewModel
+    
+    var authError: String = ""
+    var currentStrategy: AuthorizationStrategy = .logIn
+    var isSignedUp: Bool = UserDefaults.standard.bool(forKey: "isSignedUp")
+    var isUserExists: Bool = true {
+        willSet {
+            if newValue {
+                loginButton.setTitle("Log in", for: .normal)
+                switchLoginButton.setTitle("You don't have an account yet? Create", for: .normal)
+            } else {
+                loginButton.setTitle("Create new account", for: .normal)
+                switchLoginButton.setTitle("Do you already have an account? Sign In", for: .normal)
+            }
+        }
+    }
     
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
@@ -26,8 +41,10 @@ class LogInViewController: UIViewController {
     let logoImage: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(named: "logo")
+        image.image = UIImage(named: "trident")
         image.backgroundColor = .white
+        image.layer.masksToBounds = true
+        image.layer.cornerRadius = 10
         return image
     }()
     
@@ -68,12 +85,16 @@ class LogInViewController: UIViewController {
         return text
     }()
     
-    lazy var loginButton = MagicButton(title: "Log In", titleColor: .white) {
+    lazy var loginButton = MagicButton(title: "Log in", titleColor: .white) {
         self.goToProfile()
     }
     
-    init(delegate: LoginViewControllerDelegate) {
-        self.delegate = delegate
+    lazy var switchLoginButton = MagicButton(title: "You don't have an account yet? Create", titleColor: .systemBlue) {
+        self.isUserExists = !self.isUserExists
+    }
+    
+    init(loginViewModel: LoginViewModel) {
+        self.loginViewModel = loginViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -81,26 +102,10 @@ class LogInViewController: UIViewController {
         nil
     }
     
-    func goToProfile() {
-        var vc: ProfileViewController
-    #if DEBUG
-        vc = ProfileViewController(userService: TestUserService(), userName: "testUser")
-    #else
-        let name = self.loginTextField.text ?? ""
-        let password = self.passwordTextField.text ?? ""
-        let status: Bool = (self.delegate.didTapOnButton(self, enteredLogin: name, enteredPassword: password))
-        guard status else {
-            print("Try again")
-            return
-        }
-        vc = ProfileViewController(userService: CurrentUserService(), userName: name )
-    #endif
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        checkUserSignUp()
         setupLoginButton()
         setupViews()
     }
@@ -118,6 +123,82 @@ class LogInViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
+    
+    func createTabBarController() -> UITabBarController {
+        let tabBC = UITabBarController()
+        
+        let feedVC = FeedViewController(viewModel: FeedViewModel().self)
+        let feedNavVC = UINavigationController(rootViewController: feedVC)
+        feedNavVC.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 0)
+        
+        let profileVC = ProfileViewController(profileViewModel: ProfileViewModel().self)
+        let profileNavVC = UINavigationController(rootViewController: profileVC)
+        profileNavVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 1)
+        profileNavVC.isNavigationBarHidden = true
+        
+        let favoriteVC = FavoriteViewController(favoriteViewModel: FavoriteViewModel().self)
+        let favoriteNavVC = UINavigationController(rootViewController: favoriteVC)
+        favoriteNavVC.tabBarItem = UITabBarItem(title: "Favorite", image: UIImage(systemName: "star.square.fill"), tag: 2)
+        
+        tabBC.viewControllers = [profileNavVC, feedNavVC, favoriteNavVC]
+               
+        return tabBC
+    }
+    
+    func checkUserSignUp() {
+        if isSignedUp {
+            let userId = UserDefaults.standard.string(forKey: "userId")
+            if let currentId = userId {
+            let currentUser = loginViewModel.getCurrentUser(currentId)
+                let tabBC = createTabBarController()
+                self.navigationController?.pushViewController(tabBC, animated: true)
+                print("Current user: \(String(describing: currentUser.email)) is signed in")
+            }
+        } else {
+            print("No user is signed in.")
+        }
+    }
+    
+    func goToProfile() {
+        if !isUserExists {
+            currentStrategy = .newUser
+        } else {
+            currentStrategy = .logIn
+        }
+        
+        if(!(loginTextField.text ?? "").isEmpty && !(passwordTextField.text ?? "").isEmpty) {
+            userTryAuthorize(withStrategy: currentStrategy)
+        } else {
+            showAlert(message: "Please fill in all fields!")
+        }
+    }
+    
+    func userTryAuthorize(withStrategy: AuthorizationStrategy) {
+        switch currentStrategy {
+        case .logIn:
+            loginViewModel.signInUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    self.authError = unwrappedError
+                    print("Error: \(unwrappedError)")
+                    self.showAlert(message: unwrappedError)
+                }
+            }
+        case .newUser:
+            loginViewModel.createUser(userLogin: loginTextField.text ?? "", userPassword: passwordTextField.text ?? "") { error in
+                if let unwrappedError = error {
+                    self.authError = unwrappedError
+                    print("Error: \(unwrappedError)")
+                    self.showAlert(message: unwrappedError)
+                }
+            }
+        }
+        if authError == "" {
+            let tabBC = createTabBarController()
+            self.navigationController?.pushViewController(tabBC, animated: true)
+            print("Current user: \(String(describing: self.loginTextField.text)) is signed in")
+        }
+        authError = ""
+    }
 }
 
 extension LogInViewController {
@@ -131,6 +212,8 @@ extension LogInViewController {
         loginButton.setBackgroundImage(trasparentImage, for: .disabled)
         loginButton.layer.cornerRadius = 10
         loginButton.clipsToBounds = true
+        
+        switchLoginButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
     }
 }
 
@@ -145,6 +228,7 @@ extension LogInViewController {
         contentView.addSubview(loginTextField)
         contentView.addSubview(passwordTextField)
         contentView.addSubview(loginButton)
+        contentView.addSubview(switchLoginButton)
         
         let constraints = [
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -161,11 +245,11 @@ extension LogInViewController {
             
             logoImage.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             logoImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 120),
-            logoImage.widthAnchor.constraint(equalToConstant: 100),
+            logoImage.widthAnchor.constraint(equalToConstant: 150),
             logoImage.heightAnchor.constraint(equalTo: logoImage.widthAnchor),
             
             loginTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            loginTextField.topAnchor.constraint(equalTo: logoImage.bottomAnchor, constant: 120),
+            loginTextField.topAnchor.constraint(equalTo: logoImage.bottomAnchor, constant: 100),
             loginTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             loginTextField.heightAnchor.constraint(equalToConstant: 50),
             
@@ -177,8 +261,13 @@ extension LogInViewController {
             loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            loginButton.heightAnchor.constraint(equalToConstant: 50)
+            loginButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            switchLoginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            switchLoginButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 5),
+            switchLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            switchLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            switchLoginButton.heightAnchor.constraint(equalToConstant: 20)
         ]
         NSLayoutConstraint.activate(constraints)
     }
@@ -197,36 +286,5 @@ private extension LogInViewController {
     func keyboardWillHide(notification: NSNotification) {
         scrollView.contentInset.bottom = .zero
         scrollView.verticalScrollIndicatorInsets = .zero
-    }
-}
-
-protocol LoginViewControllerDelegate: AnyObject {
-
-    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool
-}
-
-class LoginInspector: LoginViewControllerDelegate {
-    
-    private let loginUseCase: Checker
-    
-    init(useCase: Checker) {
-        self.loginUseCase = useCase
-    }
-    
-    func didTapOnButton(_ controller: UIViewController, enteredLogin: String, enteredPassword: String) -> Bool {
-        return loginUseCase.checkLoginPassword(userLogin: enteredLogin, userPassword: enteredPassword)
-    }
-}
-
-/// *FACTORY*
-protocol LoginFactory {
-    func createChecker() -> LoginInspector
-}
-
-/// *FACTORY - IMPLEMENTATION*
-class MyLoginFactory: LoginFactory {
-  func createChecker() -> LoginInspector {
-      let loginInspector = LoginInspector(useCase: Checker.instance)
-        return loginInspector
     }
 }

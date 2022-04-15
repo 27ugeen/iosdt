@@ -10,6 +10,8 @@ import SnapKit
 
 class ProfileHeaderView: UITableViewHeaderFooterView {
     
+    var logOutAction: (() -> Void)?
+    
     let avatarImage: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
@@ -30,6 +32,10 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
         name.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         return name
     }()
+    
+    lazy var logOutButton = MagicButton(title: "Log out", titleColor: .white) {
+        self.logOutAction?()
+    }
     
     let statusLabel: UILabel = {
         let status = UILabel()
@@ -82,6 +88,14 @@ extension ProfileHeaderView {
         setStatusButton.layer.shadowOpacity = 0.7
         setStatusButton.layer.shadowOffset = CGSize(width: 4, height: 4)
         setStatusButton.layer.shadowColor = UIColor.black.cgColor
+        
+        logOutButton.setTitleColor(.purple, for: .highlighted)
+        logOutButton.backgroundColor = .systemBlue.withAlphaComponent(0.7)
+        logOutButton.layer.cornerRadius = 10
+        logOutButton.layer.shadowRadius = 4
+        logOutButton.layer.shadowOpacity = 0.7
+        logOutButton.layer.shadowOffset = CGSize(width: 4, height: 4)
+        logOutButton.layer.shadowColor = UIColor.black.cgColor
     }
 }
 
@@ -90,6 +104,7 @@ extension ProfileHeaderView {
         
         addSubview(avatarImage)
         addSubview(fullNameLabel)
+        addSubview(logOutButton)
         addSubview(statusLabel)
         addSubview(statusTextField)
         addSubview(setStatusButton)
@@ -102,6 +117,12 @@ extension ProfileHeaderView {
         fullNameLabel.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(16)
             make.leading.equalTo(avatarImage.snp.trailing).offset(16)
+        }
+        logOutButton.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(16)
+            make.leading.equalTo(fullNameLabel.snp.trailing)
+            make.width.equalTo(100)
+            make.trailing.equalTo(-16)
         }
         setStatusButton.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(avatarImage.snp.bottom).offset(46)
